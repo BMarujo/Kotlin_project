@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "768119149027",
+    "project_id": "kotlin-project---icm",
+    "storage_bucket": "kotlin-project---icm.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:768119149027:android:5e3f6e1e991775c38c50d6",
+        "android_client_info": {
+          "package_name": "com.example.kotlin_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBf7s7WXr5q8WvL1oOBmqnAOPK1v9k-DMY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
