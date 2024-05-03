@@ -3,6 +3,7 @@ package com.example.kotlin_project
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,10 +37,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.google.accompanist.insets.statusBarsPadding
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 
 
 class MainActivity : ComponentActivity() {
@@ -67,6 +81,18 @@ fun HomePage() {
     val items = listOf("Favorites", "Recipes", "Home", "Inventory", "Add")
     val icons = listOf(Icons.Filled.Favorite, Icons.Filled.Edit, Icons.Filled.AccountBox, Icons.Filled.List, Icons.Filled.Add)
     Scaffold(
+        topBar = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp)
+            ) {
+                CircularButton(R.drawable.baseline_home_24, onClick = { /* Handle Home button click */ })
+                Text(text = "Home", style = MaterialTheme.typography.bodySmall)
+            }
+        },
         bottomBar = {
             NavigationBar {
                 items.forEachIndexed { index, item ->
@@ -79,24 +105,28 @@ fun HomePage() {
                 }
             }
         }
-    ) { padding ->
-        // Conteúdo da tela atual
-        val content = when (selectedItem) {
-            0 -> FavoritesScreen()
-            1 -> RecipesScreen()
-            2 -> HomeScreen()
-            3 -> InventoryScreen()
-            4 -> AddScreen()
-            else -> null
-        }
-
-        // Aplicando padding ao contêiner superior
-        content?.let {
-            Column(
-                modifier = Modifier.padding(padding)
-            ) {
-                it
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    bottom = it.calculateBottomPadding() // para evitar que o conteúdo fique atrás da barra de navegação
+                )
+                .padding(
+                    top = it.calculateTopPadding()
+                )
+            //.padding(it) // <<-- or simply this
+        ) {
+            // Conteúdo da tela atual
+            val content = when (selectedItem) {
+                0 -> FavoritesScreen()
+                1 -> RecipesScreen()
+                2 -> HomeScreen()
+                3 -> InventoryScreen()
+                4 -> AddScreen()
+                else -> Text("Unknown screen")
             }
+
         }
     }
 }
@@ -104,59 +134,449 @@ fun HomePage() {
 
 @Composable
 fun HomeScreen() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
-        // Cumprimento ao usuário
-        Text("Olá, Usuário X!")
-
-        // Mensagem de exploração
-        Text("Explore as várias funcionalidades")
-
-        // Lista de itens clicáveis
-        Spacer(modifier = Modifier.height(16.dp))
-        Box(
-            modifier = Modifier
-                .padding(16.dp)
-                .border(2.dp, Color.Gray, RoundedCornerShape(16.dp))
-                .background(Color.White, RoundedCornerShape(16.dp))
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                // List Item
-                ListItem(
-                    modifier = Modifier.fillMaxWidth(),
-                    headlineContent = { Text("Three line list item") },
-                    supportingContent = {
-                        Text("Secondary text that is long and perhaps goes onto another line")
-                    },
-                    leadingContent = {
-                        Icon(
-                            Icons.Filled.Favorite,
-                            contentDescription = "Localized description",
+        Image(
+            painter = painterResource(id = R.drawable.home_kotlinproject_icm),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        LazyColumn(contentPadding = PaddingValues(top = 0.dp), state = rememberLazyListState())
+        {
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .border(2.dp,Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.White
+                            ),
+                            startY = 500f,
+                            endY = 0f
+                        ),RoundedCornerShape(16,48,48,16)
                         )
-                    },
-                    trailingContent = { Text("meta") }
-                )
+                        .background(Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.White
+                            ),
+                            startY = 500f,
+                            endY = 0f
+                        ), RoundedCornerShape(16,48,48,16)
+                        )
+                        .fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        // Cumprimento ao usuário
+                        Text(
+                            text = "Olá, Utilizador X!",
+                            textAlign = TextAlign.Right,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                        )
 
-                // Explore more button
-                Button(
-                    onClick = { /* Ação ao clicar no botão "Explore more" */ },
-                    content = { Text("Explore more") },
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                )
+                        // Mensagem de exploração
+                        Text(
+                            text = "Explore as funcionalidades do aplicativo!",
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+
+                // Lista de itens clicáveis
+                Spacer(modifier = Modifier.height(16.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    // List Item
+                    Card(// blur background
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .border(2.dp, Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White
+                                ),
+                                startX = 1500f,
+                                endX = 0f
+                            ), RoundedCornerShape(16.dp))
+                            .background(Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White
+                                ),
+                                startX = 1500f,
+                                endX = 0f
+                            ), RoundedCornerShape(16.dp)),
+                            //.height(120.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Transparent,
+                        ),
+                    ) {
+                        ListItem(
+                            colors = ListItemDefaults.colors(
+                                //transparent
+                                containerColor = Color.Transparent,
+                                headlineColor = Color.Black,
+                                leadingIconColor = Color.Black,
+                                overlineColor = Color.Black,
+                                supportingColor = Color.Black,
+                                trailingIconColor = Color.Black,
+                            ),
+                            headlineContent = {
+                                Text(
+                                    text = "Inventário",
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            },
+                            supportingContent = {
+                                Text(
+                                    text = "Adicione, edite e remova itens/ingredientes do seu inventário",
+                                    textAlign = TextAlign.Left,
+                                )
+                            },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Filled.Favorite,
+                                    contentDescription = "Localized description",
+                                )
+                            },
+                            trailingContent = {
+                                Button(
+                                    onClick = { /* Ação ao clicar no botão "Explore more" */ },
+                                    content = { Text("Explore more") },
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
+                                )
+                            }
+                        )
+                    }
+                    Card(// blur background
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .border(2.dp, Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White
+                                ),
+                                startX = 1500f,
+                                endX = 0f
+                            ), RoundedCornerShape(16.dp))
+                            .background(Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White
+                                ),
+                                startX = 1500f,
+                                endX = 0f
+                            ), RoundedCornerShape(16.dp)),
+                            //.height(120.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Transparent,
+                        ),
+                    ) {
+                        ListItem(
+                            colors = ListItemDefaults.colors(
+                                //transparent
+                                containerColor = Color.Transparent,
+                                headlineColor = Color.Black,
+                                leadingIconColor = Color.Black,
+                                overlineColor = Color.Black,
+                                supportingColor = Color.Black,
+                                trailingIconColor = Color.Black,
+                            ),
+                            headlineContent = {
+                                Text(
+                                    text = "Favoritos",
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            },
+                            supportingContent = {
+                                Text(
+                                    text = "Veja suas receitas favoritas e adicione novas",
+                                    textAlign = TextAlign.Left,
+                                )
+                            },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Filled.Favorite,
+                                    contentDescription = "Localized description",
+                                )
+                            },
+                            trailingContent = {
+                                Button(
+                                    onClick = { /* Ação ao clicar no botão "Explore more" */ },
+                                    content = { Text("Explore more") },
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
+                                )
+                            }
+                        )
+                    }
+                    Card(// blur background
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .border(2.dp, Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White
+                                ),
+                                startX = 1500f,
+                                endX = 0f
+                            ), RoundedCornerShape(16.dp))
+                            .background(Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White
+                                ),
+                                startX = 1500f,
+                                endX = 0f
+                            ), RoundedCornerShape(16.dp)),
+                            //.height(120.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Transparent,
+                        ),
+                    ) {
+                        ListItem(
+                            colors = ListItemDefaults.colors(
+                                //transparent
+                                containerColor = Color.Transparent,
+                                headlineColor = Color.Black,
+                                leadingIconColor = Color.Black,
+                                overlineColor = Color.Black,
+                                supportingColor = Color.Black,
+                                trailingIconColor = Color.Black,
+                            ),
+                            headlineContent = {
+                                Text(
+                                    text = "Receitas",
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            },
+                            supportingContent = {
+                                Text(
+                                    text = "Guarde suas receitas e adicione novas",
+                                    textAlign = TextAlign.Left,
+                                    modifier = Modifier.fillMaxSize()
+                                    )
+                            },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Filled.Favorite,
+                                    contentDescription = "Localized description",
+                                )
+                            },
+                            trailingContent = {
+                                Button(
+                                    onClick = { /* Ação ao clicar no botão "Explore more" */ },
+                                    content = { Text("Explore more") },
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
+                                )
+                            }
+                        )
+                    }
+                    Card(// blur background
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .border(2.dp, Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White
+                                ),
+                                startX = 1500f,
+                                endX = 0f
+                            ), RoundedCornerShape(16.dp))
+                            .background(Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White
+                                ),
+                                startX = 1500f,
+                                endX = 0f
+                            ), RoundedCornerShape(16.dp)),
+                            //.height(120.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Transparent,
+                        ),
+                    ) {
+                        ListItem(
+                            colors = ListItemDefaults.colors(
+                                //transparent
+                                containerColor = Color.Transparent,
+                                headlineColor = Color.Black,
+                                leadingIconColor = Color.Black,
+                                overlineColor = Color.Black,
+                                supportingColor = Color.Black,
+                                trailingIconColor = Color.Black,
+                            ),
+                            headlineContent = {
+                                Text(
+                                    text = "Adicionar Ingredientes",
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            },
+                            supportingContent = {
+                                Text(
+                                    text = "Adicione novos ingredientes ao seu inventário",
+                                    textAlign = TextAlign.Left,
+                                )
+                            },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Filled.Favorite,
+                                    contentDescription = "Localized description",
+                                )
+                            },
+                            trailingContent = {
+                                Button(
+                                    onClick = { /* Ação ao clicar no botão "Explore more" */ },
+                                    content = { Text("Explore more") },
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
+                                )
+                            }
+                        )
+                    }
+                    
+                    // to test the scroll
+                    
+                    Card(// blur background
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .border(2.dp, Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White
+                                ),
+                                startX = 1500f,
+                                endX = 0f
+                            ), RoundedCornerShape(16.dp))
+                            .background(Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White
+                                ),
+                                startX = 1500f,
+                                endX = 0f
+                            ), RoundedCornerShape(16.dp)),
+                            //.height(120.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Transparent,
+                        ),
+                    ) {
+                        ListItem(
+                            colors = ListItemDefaults.colors(
+                                //transparent
+                                containerColor = Color.Transparent,
+                                headlineColor = Color.Black,
+                                leadingIconColor = Color.Black,
+                                overlineColor = Color.Black,
+                                supportingColor = Color.Black,
+                                trailingIconColor = Color.Black,
+                            ),
+                            headlineContent = {
+                                Text(
+                                    text = "Adicionar Ingredientes",
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            },
+                            supportingContent = {
+                                Text(
+                                    text = "Adicione novos ingredientes ao seu inventário",
+                                    textAlign = TextAlign.Left,
+                                )
+                            },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Filled.Favorite,
+                                    contentDescription = "Localized description",
+                                )
+                            },
+                            trailingContent = {
+                                Button(
+                                    onClick = { /* Ação ao clicar no botão "Explore more" */ },
+                                    content = { Text("Explore more") },
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
+                                )
+                            }
+                        )
+                    }
+                    Card(// blur background
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .border(2.dp, Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White
+                                ),
+                                startX = 1500f,
+                                endX = 0f
+                            ), RoundedCornerShape(16.dp))
+                            .background(Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White
+                                ),
+                                startX = 1500f,
+                                endX = 0f
+                            ), RoundedCornerShape(16.dp)),
+                            //.height(120.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Transparent,
+                        ),
+                    ) {
+                        ListItem(
+                            colors = ListItemDefaults.colors(
+                                //transparent
+                                containerColor = Color.Transparent,
+                                headlineColor = Color.Black,
+                                leadingIconColor = Color.Black,
+                                overlineColor = Color.Black,
+                                supportingColor = Color.Black,
+                                trailingIconColor = Color.Black,
+                            ),
+                            headlineContent = {
+                                Text(
+                                    text = "Adicionar Ingredientes",
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            },
+                            supportingContent = {
+                                Text(
+                                    text = "Adicione novos ingredientes ao seu inventário",
+                                    textAlign = TextAlign.Left,
+                                )
+                            },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Filled.Favorite,
+                                    contentDescription = "Localized description",
+                                )
+                            },
+                            trailingContent = {
+                                Button(
+                                    onClick = { /* Ação ao clicar no botão "Explore more" */ },
+                                    content = { Text("Explore more") },
+                                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
+                                )
+                            }
+                        )
+                    }
+                }
             }
-
         }
-
-
     }
 }
 
