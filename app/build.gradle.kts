@@ -70,6 +70,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
+    implementation("androidx.navigation:navigation-compose:2.4.0-alpha04")
     implementation ("com.google.accompanist:accompanist-insets:0.17.0")
     implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
     implementation("com.google.firebase:firebase-analytics")
