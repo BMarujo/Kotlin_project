@@ -44,7 +44,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navArgument
+import androidx.navigation.navArgument
 import androidx.navigation.compose.rememberNavController
 
 data class InvIngredient(@DrawableRes val image: Int, val title: String, val quantity: Int, val unit: String)

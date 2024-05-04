@@ -130,7 +130,7 @@ fun HomePage() {
         ) {
             // Conteúdo da tela atual
             val content = when (selectedItem) {
-                0 -> FavoritesScreen()
+                0 -> AddRecipePage()
                 1 -> RecipesScreen()
                 2 -> HomeScreen()
                 3 -> Navigation()
@@ -619,14 +619,6 @@ fun HomeScreen() {
 fun FavoritesScreen() {
     Text(text = "Favorites Screen")
 }
-
-@Composable
-fun RecipesScreen() {
-    Text(text = "Recipes Screen")
-}
-
-
-
 
 @Preview(showBackground = true)
 @Composable

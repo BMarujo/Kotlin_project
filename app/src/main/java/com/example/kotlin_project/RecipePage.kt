@@ -64,7 +64,7 @@ fun MainFragment(recipe: Recipe) {
 
 @Composable
 fun CircularButton(
-    @DrawableRes iconResouce: Int,
+    @DrawableRes iconResource: Int,
     color: Color = Gray,
     elevation: ButtonElevation? = ButtonDefaults.buttonElevation(),
     onClick: () -> Unit = {}
@@ -79,7 +79,7 @@ fun CircularButton(
             .width(38.dp)
             .height(38.dp)
     ) {
-        Icon(painterResource(id = iconResouce), null)
+        Icon(painterResource(id = iconResource), null)
     }
 }
 
@@ -252,7 +252,11 @@ fun IngredientCard(
             Image(
                 painter = painterResource(id = iconResource),
                 contentDescription = null,
-                modifier = Modifier.padding(10.dp).height(100.dp).width(100.dp).clip(Shapes.extraLarge),
+                modifier = Modifier
+                    .padding(10.dp)
+                    .height(100.dp)
+                    .width(100.dp)
+                    .clip(Shapes.extraLarge),
                 contentScale = ContentScale.Crop
             )
         }
@@ -314,12 +318,16 @@ fun ServingCalculator() {
 
         Text(text = "Serving", Modifier.weight(1f), fontWeight = FontWeight.Medium)
         CircularButton(
-            iconResouce = R.drawable.ic_minus,
+            iconResource = R.drawable.ic_minus,
             elevation = null,
             color = Pink
         ) { value-- }
         Text(text = "$value", Modifier.padding(16.dp), fontWeight = FontWeight.Medium)
-        CircularButton(iconResouce = R.drawable.ic_plus, elevation = null, color = Pink) { value++ }
+        CircularButton(
+            iconResource = R.drawable.ic_plus,
+            elevation = null,
+            color = Pink
+        ) { value++ }
     }
 }
 
