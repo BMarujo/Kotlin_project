@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.List
@@ -84,8 +85,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun HomePage() {
     var selectedItem by remember { mutableIntStateOf(2) }
-    val items = listOf("Favorites", "Recipes", "Home", "Inventory", "Add")
-    val icons = listOf(Icons.Filled.Favorite, Icons.Filled.Edit, Icons.Filled.AccountBox, Icons.Filled.List, Icons.Filled.Add)
+    val items = listOf(/*"Favorites"*/"AddRecipe", "Recipes", "Home", "Inventory", "Add")
+    val icons = listOf(/*Icons.Filled.Favorite*/Icons.Filled.Build, Icons.Filled.Edit, Icons.Filled.AccountBox, Icons.Filled.List, Icons.Filled.Add)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(

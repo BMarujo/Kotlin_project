@@ -47,7 +47,7 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
-fun MainFragment(recipe: Recipe) {
+fun MainFragment(recipe: Recipe, onCancel: () -> Unit) {
     val scrollState = rememberLazyListState()
     ProvideWindowInsets {
         Surface(
@@ -55,7 +55,7 @@ fun MainFragment(recipe: Recipe) {
             color = White
         ) {
             Box {
-                Content(recipe, scrollState)
+                Content(recipe, scrollState, onCancel)
             }
         }
     }
@@ -84,7 +84,7 @@ fun CircularButton(
 }
 
 @Composable
-fun Content(recipe: Recipe, scrollState: LazyListState) {
+fun Content(recipe: Recipe, scrollState: LazyListState, onCancel: () -> Unit){
     LazyColumn(contentPadding = PaddingValues(top = 0.dp), state = scrollState) {
         item {
             Row(
@@ -127,6 +127,9 @@ fun Content(recipe: Recipe, scrollState: LazyListState) {
             ShoppingListButton()
             //Reviews(recipe)
             //Images()
+            Button(onClick = onCancel) {
+                Text("Go back")
+            }
         }
     }
 }
@@ -369,7 +372,7 @@ fun InfoColumn(@DrawableRes iconResource: Int, text: String) {
 @Preview(showBackground = true)
 @Composable
 fun MainFragmentPreview() {
-    MainFragment(strawberryCake)
+    MainFragment(strawberryCake, onCancel = {})
 }
 
 
