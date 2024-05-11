@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.kotlin_project"
-        minSdk = 24
+        minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -71,8 +71,19 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
+
+    implementation("androidx.camera:camera-core:1.3.0")
+    implementation("androidx.camera:camera-camera2:1.3.0")
+    implementation("androidx.camera:camera-lifecycle:1.3.0")
+    implementation("androidx.camera:camera-video:1.3.0")
+
+    implementation( "androidx.camera:camera-view:1.2.2")
+    implementation( "androidx.camera:camera-extensions:1.2.2")
+
     implementation("androidx.navigation:navigation-compose:2.4.0-alpha04")
     implementation ("com.google.accompanist:accompanist-insets:0.17.0")
     implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.17.0")
 }

@@ -44,32 +44,32 @@ import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 
 data class InvIngredient(@DrawableRes val image: Int, val title: String, val quantity: Int, val unit: String)
 val Inventoryingredients = listOf(
     // image, title, quantity
     InvIngredient(R.drawable.flour, "Chicken", 1, "kg"),
-    InvIngredient(R.drawable.juice, "Carrot", 200, "Unidades"),
+    InvIngredient(R.drawable.juice, "Carrot", 200, "Units"),
     InvIngredient(R.drawable.flour, "Beef", 500, "g"),
-    InvIngredient(R.drawable.flour, "Onion", 100, "Unidades"),
+    InvIngredient(R.drawable.flour, "Onion", 100, "Units"),
     InvIngredient(R.drawable.flour, "Potato", 300, "g"),
     InvIngredient(R.drawable.flour, "Pepper", 50, "g"),
     InvIngredient(R.drawable.flour, "Salt", 100, "g"),
     InvIngredient(R.drawable.flour, "Sugar", 200, "g"),
     InvIngredient(R.drawable.flour, "Flour", 500, "g"),
     InvIngredient(R.drawable.flour, "Milk", 1, "L"),
-    InvIngredient(R.drawable.flour, "Egg", 12, "Unidades"),
+    InvIngredient(R.drawable.flour, "Egg", 12, "Units"),
     InvIngredient(R.drawable.flour, "Butter", 200, "g"),
     InvIngredient(R.drawable.flour, "Cheese", 500, "g"),
     InvIngredient(R.drawable.flour, "Bread", 1, "kg"),
     InvIngredient(R.drawable.flour, "Rice", 1, "kg"),
     InvIngredient(R.drawable.flour, "Pasta", 500, "g"),
     InvIngredient(R.drawable.flour, "Spaghetti", 500, "g"),
-    InvIngredient(R.drawable.flour, "Apple", 1, "Unidades"),
-    InvIngredient(R.drawable.flour, "Banana", 1, "Unidades"),
-    InvIngredient(R.drawable.flour,"Orange", 1, "Unidades"),
+    InvIngredient(R.drawable.flour, "Apple", 1, "Units"),
+    InvIngredient(R.drawable.flour, "Banana", 1, "Units"),
+    InvIngredient(R.drawable.flour,"Orange", 1, "Units"),
 )
 
 @Composable
@@ -142,7 +142,7 @@ fun InventoryScreen(navController: NavController){
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(
-                            text = "Clique no item para fazer alterações",
+                            text = "Click on an Ingredient to configure it",
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
                             fontSize = MaterialTheme.typography.titleLarge.fontSize,

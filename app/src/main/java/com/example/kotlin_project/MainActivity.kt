@@ -3,7 +3,6 @@ package com.example.kotlin_project
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.List
@@ -31,6 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -68,9 +67,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Kotlin_ProjectTheme {
-                var selectedItem by remember { mutableIntStateOf(0) }
-                val items = listOf("Favorites", "Recipes", "Inventory", "Add")
-                val icons = listOf(Icons.Filled.Favorite, Icons.Filled.AccountBox, Icons.Filled.List, Icons.Filled.Add)
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -85,14 +81,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun HomePage() {
     var selectedItem by remember { mutableIntStateOf(2) }
-    val items = listOf(/*"Favorites"*/"AddRecipe", "Recipes", "Home", "Inventory", "Add")
-    val icons = listOf(/*Icons.Filled.Favorite*/Icons.Filled.Build, Icons.Filled.Edit, Icons.Filled.AccountBox, Icons.Filled.List, Icons.Filled.Add)
+    val items = listOf("Favorites", "Recipes", "Home", "Inventory", "Add")
+    val icons = listOf(Icons.Filled.Favorite, Icons.Filled.Edit, Icons.Filled.AccountBox, Icons.Filled.List, Icons.Filled.Add)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
+
         topBar = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -116,7 +110,20 @@ fun HomePage() {
                     )
                 }
             }
-        }
+        },
+        // para o temporizador ou para medir a temperatura
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    // Handle FAB click
+                }
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Localized description")
+            }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
     ) {
         Box(
             modifier = Modifier
@@ -131,7 +138,7 @@ fun HomePage() {
         ) {
             // Conteúdo da tela atual
             val content = when (selectedItem) {
-                0 -> AddRecipePage()
+                0 -> FavoritesScreen()
                 1 -> RecipesScreen()
                 2 -> HomeScreen()
                 3 -> Navigation()
@@ -187,13 +194,13 @@ fun HomeScreen() {
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(
-                            text = "Olá, Utilizador X!",
+                            text = "Hi, User X!",
                             textAlign = TextAlign.Left,
                             fontWeight = FontWeight.Bold,
                             fontSize = MaterialTheme.typography.titleLarge.fontSize,
                         )
                         Text(
-                            text = "Explore as funcionalidades do aplicativo!",
+                            text = "Explore your inventory, favorite recipes and more",
                             textAlign = TextAlign.Left,
                             fontWeight = FontWeight.Bold,
                         )
@@ -249,13 +256,13 @@ fun HomeScreen() {
                             ),
                             headlineContent = {
                                 Text(
-                                    text = "Inventário",
+                                    text = "Inventory",
                                     fontWeight = FontWeight.Bold,
                                 )
                             },
                             supportingContent = {
                                 Text(
-                                    text = "Adicione, edite e remova itens/ingredientes do seu inventário",
+                                    text = "Add, edit and remove items/ingredients from your inventory",
                                     textAlign = TextAlign.Left,
                                 )
                             },
@@ -315,13 +322,13 @@ fun HomeScreen() {
                             ),
                             headlineContent = {
                                 Text(
-                                    text = "Favoritos",
+                                    text = "Favorites",
                                     fontWeight = FontWeight.Bold,
                                 )
                             },
                             supportingContent = {
                                 Text(
-                                    text = "Veja suas receitas favoritas e adicione novas",
+                                    text = "See your favorite recipes and add new ones",
                                     textAlign = TextAlign.Left,
                                 )
                             },
@@ -381,13 +388,13 @@ fun HomeScreen() {
                             ),
                             headlineContent = {
                                 Text(
-                                    text = "Receitas",
+                                    text = "Recipes",
                                     fontWeight = FontWeight.Bold,
                                 )
                             },
                             supportingContent = {
                                 Text(
-                                    text = "Guarde suas receitas e adicione novas",
+                                    text = "Save your recipes and add new ones",
                                     textAlign = TextAlign.Left,
                                     modifier = Modifier.fillMaxSize()
                                     )
@@ -448,13 +455,13 @@ fun HomeScreen() {
                             ),
                             headlineContent = {
                                 Text(
-                                    text = "Adicionar Ingredientes",
+                                    text = "Add Ingredients",
                                     fontWeight = FontWeight.Bold,
                                 )
                             },
                             supportingContent = {
                                 Text(
-                                    text = "Adicione novos ingredientes ao seu inventário",
+                                    text = "Add new ingredients to your inventory",
                                     textAlign = TextAlign.Left,
                                 )
                             },
@@ -517,13 +524,13 @@ fun HomeScreen() {
                             ),
                             headlineContent = {
                                 Text(
-                                    text = "Adicionar Ingredientes",
+                                    text = "Add Ingredients",
                                     fontWeight = FontWeight.Bold,
                                 )
                             },
                             supportingContent = {
                                 Text(
-                                    text = "Adicione novos ingredientes ao seu inventário",
+                                    text = "Add new ingredients to your inventory",
                                     textAlign = TextAlign.Left,
                                 )
                             },
@@ -583,13 +590,13 @@ fun HomeScreen() {
                             ),
                             headlineContent = {
                                 Text(
-                                    text = "Adicionar Ingredientes",
+                                    text = "Add Ingredients",
                                     fontWeight = FontWeight.Bold,
                                 )
                             },
                             supportingContent = {
                                 Text(
-                                    text = "Adicione novos ingredientes ao seu inventário",
+                                    text = "Add new ingredients to your inventory",
                                     textAlign = TextAlign.Left,
                                 )
                             },
