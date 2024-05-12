@@ -1,19 +1,14 @@
 package com.example.kotlin_project
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
@@ -24,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,17 +28,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.LightGray
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberImagePainter
+import com.example.kotlin_project.data.Recipe
+import com.example.kotlin_project.data.RecipesRepository
 
 
 enum class RecipesScreenEnum() {
@@ -52,6 +48,7 @@ enum class RecipesScreenEnum() {
 
 @Composable
 fun RecipesScreen(
+    recipesRepository: RecipesRepository,
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(
@@ -60,9 +57,8 @@ fun RecipesScreen(
     ) {
         composable(route = RecipesScreenEnum.Recipes.name) {
             MainRecipesScreen(
-                onNextButtonClicked = {
-                    navController.navigate(RecipesScreenEnum.RecipesDetails.name)
-                },
+                viewModel = RecipeViewModel(recipesRepository)
+
             )
         }
         composable(route = RecipesScreenEnum.RecipesDetails.name) {
@@ -76,12 +72,12 @@ fun RecipesScreen(
     }
 }
 
-
 @Composable
 fun MainRecipesScreen(
-    onNextButtonClicked: () -> Unit,
+    viewModel: RecipeViewModel
+) {
+    val allRecipes by viewModel.allRecipes.collectAsState(initial = emptyList())
 
-    ) {
     LazyColumn(modifier = Modifier.padding(8.dp)) {
         item {
             Text(
@@ -91,12 +87,14 @@ fun MainRecipesScreen(
                 modifier = Modifier.padding(8.dp)
             )
             SearchComponent()
-            RecipeListItem(onNextButtonClicked = onNextButtonClicked)
+            allRecipes.forEach { recipe ->
+                RecipeListItem(
+                    recipe = recipe
+                )
+            }
         }
     }
 }
-
-
 @Composable
 fun SearchComponent() {
     Column(
@@ -124,12 +122,10 @@ fun SearchComponent() {
 
     }
 }
-
 @Composable
 fun RecipeListItem(
-    onNextButtonClicked: () -> Unit
+    recipe: Recipe,
 ) {
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -144,43 +140,41 @@ fun RecipeListItem(
             modifier = Modifier.padding(8.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.strawberry_pie_1),
+                painter = rememberImagePainter(recipe.imageUrl),
                 contentDescription = null,
                 Modifier
                     .height(200.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.padding(4.dp))
             Text(
-                text = "", fontSize = 24.sp, fontWeight = FontWeight.Bold
+                text = recipe.name,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
-                text = "Ingredients", fontSize = 20.sp, fontWeight = FontWeight.SemiBold
+                text = "Ingredients",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold
             )
-            Text(
-                text = "açucar\n" + "farinha\n" + "ovo"
-            )
+            Text(text = recipe.ingredients)
+
             Spacer(modifier = Modifier.padding(8.dp))
-
-
             Column {
                 Text(
-                    text = "Instructions", fontSize = 20.sp, fontWeight = FontWeight.SemiBold
+                    text = "Instructions",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "lista de instruções"
+                    text = recipe.description
                 )
             }
-
-            Spacer(modifier = Modifier.padding(8.dp))
-            Button(onClick = onNextButtonClicked) {
-                Text("Show Recipe's Details")
-            }
-
             Spacer(modifier = Modifier.padding(8.dp))
 
-
+            Spacer(modifier = Modifier.padding(8.dp))
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -191,176 +185,10 @@ fun RecipeListItem(
                     modifier = Modifier.align(
                         Alignment.CenterHorizontally
                     )
-
                 )
             }
-
-
-            Image(
-                painter = painterResource(id = R.drawable.strawberry_pie_1),
-                contentDescription = null,
-                Modifier
-                    .height(200.dp)
-                    .fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.padding(4.dp))
-            Text(
-                text = "", fontSize = 24.sp, fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
-            Text(
-                text = "Ingredients", fontSize = 20.sp, fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = "açucar\n" + "farinha\n" + "ovo"
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
-
-
-            Column {
-                Text(
-                    text = "Instructions", fontSize = 20.sp, fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "lista de instruções"
-                )
-            }
-
-            Spacer(modifier = Modifier.padding(8.dp))
-            Button(onClick = { /*TODO*/ }) {
-                Text("Show Recipe's Details")
-            }
-
-            Spacer(modifier = Modifier.padding(8.dp))
-
-
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowUp,
-                    contentDescription = "Clear",
-                    tint = Color.Black,
-                    modifier = Modifier.align(
-                        Alignment.CenterHorizontally
-                    )
-
-                )
-            }
-
-
-            Image(
-                painter = painterResource(id = R.drawable.strawberry_pie_1),
-                contentDescription = null,
-                Modifier
-                    .height(200.dp)
-                    .fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.padding(4.dp))
-            Text(
-                text = "", fontSize = 24.sp, fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
-            Text(
-                text = "Ingredients", fontSize = 20.sp, fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = "açucar\n" + "farinha\n" + "ovo"
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
-
-
-            Column {
-                Text(
-                    text = "Instructions", fontSize = 20.sp, fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "lista de instruções"
-                )
-            }
-
-            Spacer(modifier = Modifier.padding(8.dp))
-            Button(onClick = { /*TODO*/ }) {
-                Text("Show Recipe's Details")
-            }
-
-            Spacer(modifier = Modifier.padding(8.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowUp,
-                    contentDescription = "Clear",
-                    tint = Color.Black,
-                    modifier = Modifier.align(
-                        Alignment.CenterHorizontally
-                    )
-
-                )
-            }
-
-
-
-            Image(
-                painter = painterResource(id = R.drawable.strawberry_pie_1),
-                contentDescription = null,
-                Modifier
-                    .height(200.dp)
-                    .fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.padding(4.dp))
-            Text(
-                text = "", fontSize = 24.sp, fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
-            Text(
-                text = "Ingredients", fontSize = 20.sp, fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = "açucar\n" + "farinha\n" + "ovo"
-            )
-            Spacer(modifier = Modifier.padding(8.dp))
-
-
-            Column {
-                Text(
-                    text = "Instructions", fontSize = 20.sp, fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "lista de instruções"
-                )
-            }
-
-
-            Spacer(modifier = Modifier.padding(8.dp))
-            Button(onClick = { /*TODO*/ }) {
-                Text("Show Recipe's Details")
-            }
-
-            Spacer(modifier = Modifier.padding(8.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowUp,
-                    contentDescription = "Clear",
-                    tint = Color.Black,
-                    modifier = Modifier.align(
-                        Alignment.CenterHorizontally
-                    )
-
-                )
-            }
-
         }
     }
 }
 
 
-@Preview
-@Composable
-fun PreviewRecipeListItem() {
-    MainRecipesScreen(onNextButtonClicked = {})
-}

@@ -59,10 +59,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.kotlin_project.ui.theme.Kotlin_ProjectTheme
 import com.google.accompanist.insets.statusBarsPadding
-
+import com.example.kotlin_project.data.AppContainer
+import com.example.kotlin_project.data.AppDataContainer
+import com.example.kotlin_project.data.RecipesRepository
 
 
 class MainActivity : ComponentActivity() {
+    private val appContainer: AppContainer by lazy {
+        AppDataContainer(context = applicationContext)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -71,15 +77,16 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomePage()
+                    HomePage(appContainer.recipesRepository)
                 }
             }
         }
     }
 }
 
+
 @Composable
-fun HomePage() {
+fun HomePage( recipesRepository: RecipesRepository) {
     var selectedItem by remember { mutableIntStateOf(2) }
     val items = listOf("Favorites", "Recipes", "Home", "Inventory", "Add")
     val icons = listOf(Icons.Filled.Favorite, Icons.Filled.Edit, Icons.Filled.AccountBox, Icons.Filled.List, Icons.Filled.Add)
@@ -139,7 +146,7 @@ fun HomePage() {
             // Conteúdo da tela atual
             val content = when (selectedItem) {
                 0 -> FavoritesScreen()
-                1 -> RecipesScreen()
+                1 -> RecipesScreen( recipesRepository )
                 2 -> HomeScreen()
                 3 -> Navigation()
                 4 -> Navigation2(scope, snackbarHostState)
@@ -628,13 +635,7 @@ fun FavoritesScreen() {
     Text(text = "Favorites Screen")
 }
 
-@Preview(showBackground = true)
-@Composable
-fun HomePreview() {
-    Kotlin_ProjectTheme {
-        HomePage()
-    }
-}
+
 /*
 @Preview(showBackground = true)
 @Composable
