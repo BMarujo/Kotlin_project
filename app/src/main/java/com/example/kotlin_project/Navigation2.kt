@@ -54,6 +54,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.example.kotlin_project.data.RecipesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.io.File
@@ -62,7 +63,7 @@ import java.io.IOException
 
 
 @Composable
-fun Navigation2(scope: CoroutineScope, snackbarHostState: SnackbarHostState){
+fun Navigation2(scope: CoroutineScope, snackbarHostState: SnackbarHostState, recipesRepository: RecipesRepository){
 
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screen.ChooseItemOrRecipe.route){
@@ -75,7 +76,7 @@ fun Navigation2(scope: CoroutineScope, snackbarHostState: SnackbarHostState){
         }
 
         composable(route = Screen.AddRecipe.route){
-            AddRecipePage(navController, scope, snackbarHostState)
+            AddRecipePage(navController, scope, snackbarHostState, viewModel = RecipeViewModel(recipesRepository))
         }
 
         composable(route = Screen.Inventory.route){

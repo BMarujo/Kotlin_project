@@ -149,7 +149,7 @@ fun HomePage( recipesRepository: RecipesRepository) {
                 1 -> RecipesScreen( recipesRepository )
                 2 -> HomeScreen()
                 3 -> Navigation()
-                4 -> Navigation2(scope, snackbarHostState)
+                4 -> Navigation2(scope, snackbarHostState, recipesRepository)
                 else -> Text("Unknown screen")
             }
 

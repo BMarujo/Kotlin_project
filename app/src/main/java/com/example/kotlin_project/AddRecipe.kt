@@ -45,11 +45,14 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import com.example.kotlin_project.data.Recipe
+import java.io.File
+import java.io.IOException
 
 val ingredients = listOf("Rice", "Onion", "Carrots")
 
 @Composable
-fun AddRecipePage(navController: NavController, scope: CoroutineScope, snackbarHostState: SnackbarHostState, context: Context = LocalContext.current) {
+fun AddRecipePage(navController: NavController, scope: CoroutineScope, snackbarHostState: SnackbarHostState, context: Context = LocalContext.current, viewModel: RecipeViewModel) {
     val nameState = remember { mutableStateOf("") }
     val categoryState = remember { mutableStateOf("") }
     val descriptionState = remember { mutableStateOf("") }
@@ -57,6 +60,7 @@ fun AddRecipePage(navController: NavController, scope: CoroutineScope, snackbarH
     val timeToCookState = remember { mutableStateOf("") }
     val caloriesState = remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
+    val result = remember { mutableStateOf<Uri?>(null) }
 
     var selectedIngredient by remember { mutableStateOf("") }
 
@@ -89,7 +93,6 @@ fun AddRecipePage(navController: NavController, scope: CoroutineScope, snackbarH
                         .padding(16.dp)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                    val result = remember { mutableStateOf<Uri?>(null) }
                     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
                         result.value = it
                     }
@@ -238,14 +241,58 @@ fun AddRecipePage(navController: NavController, scope: CoroutineScope, snackbarH
         item {
 
             // Button to finish adding recipe
+            // Button click handler to finish adding the recipe
             Button(onClick = {
-                scope.launch {
-                    snackbarHostState.showSnackbar("Ingredient added successfully!")
-                }
+                // Ensure an image URI is selected
+                    // Get the image URI from the local resources
+                    val imageUri = saveImageToInternalStorage(context, result.value)
+
+                    // Create a comma-separated string of ingredients
+                    val ingredientsString = ingredientsList.joinToString(", ")
+
+                    // Create a Recipe object with the entered details
+                    val recipe = Recipe(
+                        name = nameState.value,
+                        category = categoryState.value,
+                        description = descriptionState.value,
+                        ingredients = ingredientsString, // Use the comma-separated string
+                        timeToCook = timeToCookState.value.toIntOrNull() ?: 0,
+                        calories = caloriesState.value.toIntOrNull() ?: 0,
+                        imageUrl = imageUri.toString() // Store the image URI as a string
+                    )
+
+                    // Use the RecipeViewModel to insert the recipe into the database
+                    viewModel.insertRecipe(recipe)
+
+                    // Show a snackbar to indicate that the recipe was added successfully
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Recipe Added Successfully!")
+                    }
             }, modifier = Modifier.fillMaxWidth()) {
                 Text("Add Recipe")
             }
+
+
+
         }
     }
 }
+
+private fun saveImageToInternalStorage(context: Context, imageUri: Uri?): Uri? {
+    if (imageUri != null) {
+        try {
+            val inputStream = context.contentResolver.openInputStream(imageUri)
+            val fileName = "recipe_image.jpg"
+            val outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE)
+            inputStream?.copyTo(outputStream)
+            inputStream?.close()
+            outputStream.close()
+            return Uri.fromFile(File(context.filesDir, fileName))
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+    return null
+}
+
 
