@@ -55,13 +55,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.kotlin_project.ui.theme.Kotlin_ProjectTheme
-import com.google.accompanist.insets.statusBarsPadding
 import com.example.kotlin_project.data.AppContainer
 import com.example.kotlin_project.data.AppDataContainer
 import com.example.kotlin_project.data.RecipesRepository
+import com.example.kotlin_project.ui.theme.Kotlin_ProjectTheme
+import com.google.accompanist.insets.statusBarsPadding
 
 
 class MainActivity : ComponentActivity() {
@@ -122,10 +121,16 @@ fun HomePage( recipesRepository: RecipesRepository) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    // Handle FAB click
+                    // redirect to the timer screen
+                    selectedItem = 5
                 }
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "Localized description")
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_clock),
+                    contentDescription = null,
+                    tint = Color.Black,
+                    modifier = Modifier.height(24.dp)
+                )
             }
         },
         snackbarHost = {
@@ -148,8 +153,9 @@ fun HomePage( recipesRepository: RecipesRepository) {
                 0 -> FavoritesScreen()
                 1 -> RecipesScreen( recipesRepository )
                 2 -> HomeScreen()
-                3 -> Navigation()
-                4 -> Navigation2(scope, snackbarHostState, recipesRepository)
+                3 -> InventoryManagement()
+                4 -> AddPage(scope, snackbarHostState, recipesRepository)
+                5 -> TimerScreen()
                 else -> Text("Unknown screen")
             }
 

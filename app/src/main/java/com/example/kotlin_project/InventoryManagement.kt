@@ -73,7 +73,7 @@ val Inventoryingredients = listOf(
 )
 
 @Composable
-fun Navigation() {
+fun InventoryManagement() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screen.Inventory.route){
         composable(route = Screen.Inventory.route){

@@ -63,7 +63,7 @@ import java.io.IOException
 
 
 @Composable
-fun Navigation2(scope: CoroutineScope, snackbarHostState: SnackbarHostState, recipesRepository: RecipesRepository){
+fun AddPage(scope: CoroutineScope, snackbarHostState: SnackbarHostState, recipesRepository: RecipesRepository){
 
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screen.ChooseItemOrRecipe.route){
@@ -80,7 +80,7 @@ fun Navigation2(scope: CoroutineScope, snackbarHostState: SnackbarHostState, rec
         }
 
         composable(route = Screen.Inventory.route){
-            Navigation()
+            InventoryManagement()
         }
     }
 }
