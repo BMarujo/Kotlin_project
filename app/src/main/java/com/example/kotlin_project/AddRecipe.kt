@@ -26,6 +26,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -49,7 +50,6 @@ import com.example.kotlin_project.data.Recipe
 import java.io.File
 import java.io.IOException
 
-val ingredients = listOf("Rice", "Onion", "Carrots")
 
 @Composable
 fun AddRecipePage(navController: NavController, scope: CoroutineScope, snackbarHostState: SnackbarHostState, context: Context = LocalContext.current, viewModel: RecipeViewModel) {
@@ -62,7 +62,7 @@ fun AddRecipePage(navController: NavController, scope: CoroutineScope, snackbarH
     var expanded by remember { mutableStateOf(false) }
     val result = remember { mutableStateOf<Uri?>(null) }
 
-    var selectedIngredient by remember { mutableStateOf("") }
+    val ingredientsState by viewModel.allIngredients.collectAsState()
 
     LazyColumn(
         modifier = Modifier
@@ -222,21 +222,27 @@ fun AddRecipePage(navController: NavController, scope: CoroutineScope, snackbarH
             }
         }
         if (expanded) {
-            item {
-                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    ingredients.forEach { ingredient ->
-                        DropdownMenuItem(onClick = {
-                            ingredientsList.add(ingredient)
-                            selectedIngredient = ingredient
-                            expanded = false
-                        }, text = { Text(ingredient) })
+                item {
+                    // Dropdown menu for selecting ingredients
+                    if (ingredientsState.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
+                            Text("Add Ingredients To Recipe")
+                        }
+
+                        if (expanded) {
+                            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                                ingredientsState.forEach { ingredient ->
+                                    DropdownMenuItem(onClick = {
+                                        ingredientsList.add(ingredient.name)
+                                        expanded = false
+                                    }, text = { Text(ingredient.name) })
+                                }
+                            }
+                        }
                     }
                 }
-            }
         }
-
-
-
 
         item {
 
@@ -245,7 +251,7 @@ fun AddRecipePage(navController: NavController, scope: CoroutineScope, snackbarH
             Button(onClick = {
                 // Ensure an image URI is selected
                     // Get the image URI from the local resources
-                    val imageUri = saveImageToInternalStorage(context, result.value)
+                    val imageUri = saveImageToInternalStorage(context, result.value, nameState.value)
 
                     // Create a comma-separated string of ingredients
                     val ingredientsString = ingredientsList.joinToString(", ")
@@ -278,11 +284,11 @@ fun AddRecipePage(navController: NavController, scope: CoroutineScope, snackbarH
     }
 }
 
-private fun saveImageToInternalStorage(context: Context, imageUri: Uri?): Uri? {
+private fun saveImageToInternalStorage(context: Context, imageUri: Uri?, img_name: String): Uri? {
     if (imageUri != null) {
         try {
             val inputStream = context.contentResolver.openInputStream(imageUri)
-            val fileName = "recipe_image.jpg"
+            val fileName = img_name
             val outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE)
             inputStream?.copyTo(outputStream)
             inputStream?.close()

@@ -155,7 +155,7 @@ fun HomePage( recipesRepository: RecipesRepository) {
                 2 -> HomeScreen()
                 3 -> InventoryManagement()
                 4 -> AddPage(scope, snackbarHostState, recipesRepository)
-                5 -> TimerScreen()
+                //5 -> TimerScreen()
                 else -> Text("Unknown screen")
             }
 
