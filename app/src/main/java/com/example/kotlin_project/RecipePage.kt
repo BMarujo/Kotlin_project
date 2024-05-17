@@ -47,7 +47,7 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
-fun MainFragment(recipe: Recipe, onCancel: () -> Unit) {
+fun MainFragment(recipe: Recipe, recipeId: Int, viewModel: RecipeViewModel, onCancel: () -> Unit) {
     val scrollState = rememberLazyListState()
     ProvideWindowInsets {
         Surface(
@@ -367,12 +367,6 @@ fun InfoColumn(@DrawableRes iconResource: Int, text: String) {
         )
         Text(text = text, fontWeight = FontWeight.Bold)
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MainFragmentPreview() {
-    MainFragment(strawberryCake, onCancel = {})
 }
 
 

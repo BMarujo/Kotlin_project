@@ -61,6 +61,25 @@ import com.example.kotlin_project.data.AppDataContainer
 import com.example.kotlin_project.data.RecipesRepository
 import com.example.kotlin_project.ui.theme.Kotlin_ProjectTheme
 import com.google.accompanist.insets.statusBarsPadding
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 
 class MainActivity : ComponentActivity() {
@@ -87,8 +106,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun HomePage( recipesRepository: RecipesRepository) {
     var selectedItem by remember { mutableIntStateOf(2) }
-    val items = listOf("Favorites", "Recipes", "Home", "Inventory", "Add")
-    val icons = listOf(Icons.Filled.Favorite, Icons.Filled.Edit, Icons.Filled.AccountBox, Icons.Filled.List, Icons.Filled.Add)
+    val items = listOf("Sensor", "Recipes", "Home", "Inventory", "Add")
+    val icons = listOf(Icons.Filled.Warning, Icons.Filled.Edit, Icons.Filled.AccountBox, Icons.Filled.List, Icons.Filled.Add)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
@@ -150,7 +169,7 @@ fun HomePage( recipesRepository: RecipesRepository) {
         ) {
             // Conteúdo da tela atual
             val content = when (selectedItem) {
-                0 -> FavoritesScreen()
+                0 -> AmbientTemperatureSensor()
                 1 -> RecipesScreen( recipesRepository )
                 2 -> HomeScreen()
                 3 -> InventoryManagement()
@@ -637,8 +656,58 @@ fun HomeScreen() {
 
 
 @Composable
-fun FavoritesScreen() {
-    Text(text = "Favorites Screen")
+fun AmbientTemperatureSensor() {
+    val context = LocalContext.current
+    var temperature by remember { mutableStateOf("0") }
+    var isSensorRunning by remember { mutableStateOf(false) }
+    val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    val temperatureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
+
+    val sensorEventListener = remember {
+        object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent?) {
+                if (event?.sensor?.type == Sensor.TYPE_AMBIENT_TEMPERATURE) {
+                    temperature = event.values[0].toString()
+                }
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+    }
+
+    fun startSensor() {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BODY_SENSORS)
+            != PackageManager.PERMISSION_GRANTED) {
+            // Request permission
+            ActivityCompat.requestPermissions(context as ComponentActivity, arrayOf(Manifest.permission.BODY_SENSORS), 0)
+        } else {
+            sensorManager.registerListener(sensorEventListener, temperatureSensor, SensorManager.SENSOR_DELAY_NORMAL)
+            isSensorRunning = true
+        }
+    }
+
+    fun stopSensor() {
+        sensorManager.unregisterListener(sensorEventListener)
+        isSensorRunning = false
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text(text = "Ambient Temperature: $temperature °C")
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(onClick = {
+            if (isSensorRunning) {
+                stopSensor()
+            } else {
+                startSensor()
+            }
+        }) {
+            Text(if (isSensorRunning) "Stop Sensor" else "Start Sensor")
+        }
+    }
 }
 
 

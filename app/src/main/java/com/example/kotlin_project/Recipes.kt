@@ -33,9 +33,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import coil.compose.rememberImagePainter
 import com.example.kotlin_project.data.Recipe
 import com.example.kotlin_project.data.RecipesRepository
@@ -57,24 +59,37 @@ fun RecipesScreen(
     ) {
         composable(route = RecipesScreenEnum.Recipes.name) {
             MainRecipesScreen(
-                viewModel = RecipeViewModel(recipesRepository)
+                viewModel = RecipeViewModel(recipesRepository),
+                navController = navController
 
             )
         }
-        composable(route = RecipesScreenEnum.RecipesDetails.name) {
-            MainFragment(
-                recipe = strawberryCake,
-                onCancel = {
-                    navController.popBackStack(RecipesScreenEnum.Recipes.name, inclusive = false)
-                },
-            )
+        composable(
+            route = "${RecipesScreenEnum.RecipesDetails.name}/{recipeId}",
+            arguments = listOf(navArgument("recipeId") { type = NavType.IntType })
+        ) { navBackStackEntry ->
+            val recipeId = navBackStackEntry.arguments?.getInt("recipeId")
+            val viewModel = RecipeViewModel(recipesRepository)
+
+                recipeId?.let { id ->
+                    MainFragment(
+                        recipe = strawberryCake,
+                        recipeId = id,
+                        viewModel = viewModel,
+                        onCancel = {
+                            navController.popBackStack(RecipesScreenEnum.Recipes.name, inclusive = false)
+                        },
+                    )
+                }
         }
+
     }
 }
 
 @Composable
 fun MainRecipesScreen(
-    viewModel: RecipeViewModel
+    viewModel: RecipeViewModel,
+    navController: NavHostController
 ) {
     val allRecipes by viewModel.allRecipes.collectAsState(initial = emptyList())
 
@@ -89,7 +104,8 @@ fun MainRecipesScreen(
             SearchComponent()
             allRecipes.forEach { recipe ->
                 RecipeListItem(
-                    recipe = recipe
+                    recipe = recipe,
+                    navController = navController
                 )
             }
         }
@@ -125,6 +141,7 @@ fun SearchComponent() {
 @Composable
 fun RecipeListItem(
     recipe: Recipe,
+    navController: NavHostController
 ) {
     Card(
         modifier = Modifier
@@ -178,14 +195,15 @@ fun RecipeListItem(
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowUp,
-                    contentDescription = "Clear",
-                    tint = Color.Black,
-                    modifier = Modifier.align(
-                        Alignment.CenterHorizontally
-                    )
-                )
+                Button(onClick = {
+                    navController.navigate("${RecipesScreenEnum.RecipesDetails.name}/${recipe.id}") {
+                        popUpTo(RecipesScreenEnum.Recipes.name) { inclusive = false }
+                    }
+                }) {
+                    Text(text = "Open Recipe's Details")
+
+                }
+
             }
         }
     }
