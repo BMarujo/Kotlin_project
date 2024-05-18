@@ -68,6 +68,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -167,7 +168,7 @@ fun HomePage( recipesRepository: RecipesRepository) {
                 )
             //.padding(it) // <<-- or simply this
         ) {
-            // Conteúdo da tela atual
+            // Home Screen content
             val content = when (selectedItem) {
                 0 -> AmbientTemperatureSensor()
                 1 -> RecipesScreen( recipesRepository )
@@ -660,6 +661,7 @@ fun AmbientTemperatureSensor() {
     val context = LocalContext.current
     var temperature by remember { mutableStateOf("0") }
     var isSensorRunning by remember { mutableStateOf(false) }
+    var sensorAvailable by remember { mutableStateOf(true) }
     val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     val temperatureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
 
@@ -668,6 +670,7 @@ fun AmbientTemperatureSensor() {
             override fun onSensorChanged(event: SensorEvent?) {
                 if (event?.sensor?.type == Sensor.TYPE_AMBIENT_TEMPERATURE) {
                     temperature = event.values[0].toString()
+                    Log.d("AmbientTemperatureSensor", "Temperature: $temperature")
                 }
             }
 
@@ -681,8 +684,12 @@ fun AmbientTemperatureSensor() {
             // Request permission
             ActivityCompat.requestPermissions(context as ComponentActivity, arrayOf(Manifest.permission.BODY_SENSORS), 0)
         } else {
-            sensorManager.registerListener(sensorEventListener, temperatureSensor, SensorManager.SENSOR_DELAY_NORMAL)
-            isSensorRunning = true
+            if (temperatureSensor == null) {
+                sensorAvailable = false
+            } else {
+                sensorManager.registerListener(sensorEventListener, temperatureSensor, SensorManager.SENSOR_DELAY_NORMAL)
+                isSensorRunning = true
+            }
         }
     }
 
@@ -696,20 +703,23 @@ fun AmbientTemperatureSensor() {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        Text(text = "Ambient Temperature: $temperature °C")
-        Spacer(modifier = Modifier.height(20.dp))
-        Button(onClick = {
-            if (isSensorRunning) {
-                stopSensor()
-            } else {
-                startSensor()
+        if (sensorAvailable) {
+            Text(text = "Ambient Temperature: $temperature °C")
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(onClick = {
+                if (isSensorRunning) {
+                    stopSensor()
+                } else {
+                    startSensor()
+                }
+            }) {
+                Text(if (isSensorRunning) "Stop Sensor" else "Start Sensor")
             }
-        }) {
-            Text(if (isSensorRunning) "Stop Sensor" else "Start Sensor")
+        } else {
+            Text(text = "Ambient Temperature Sensor not available on this device.")
         }
     }
 }
-
 
 /*
 @Preview(showBackground = true)
