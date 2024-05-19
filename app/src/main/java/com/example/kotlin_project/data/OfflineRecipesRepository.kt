@@ -24,4 +24,8 @@ class OfflineRecipesRepository(
     override suspend fun deleteIngredient(ingredient: Ingredient) = ingredientDao.delete(ingredient)
 
     override suspend fun updateIngredient(ingredient: Ingredient) = ingredientDao.update(ingredient)
+
+    override fun getRecipeById(recipeId: Int) = recipeDao.getRecipeById(recipeId)
+
+    override fun getIngredientsByNames(ingredientNames: List<String>) = ingredientDao.getIngredientsByNames(ingredientNames)
 }

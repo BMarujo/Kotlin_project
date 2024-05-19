@@ -23,6 +23,8 @@ interface RecipesRepository {
     suspend fun deleteIngredient(ingredient: Ingredient)
 
     suspend fun updateIngredient(ingredient: Ingredient)
+    fun getRecipeById(recipeId: Int): Flow<Recipe>
+    fun getIngredientsByNames(ingredientNames: List<String>): Flow<List<Ingredient>>
 }
 
 

@@ -73,7 +73,6 @@ fun RecipesScreen(
 
                 recipeId?.let { id ->
                     MainFragment(
-                        recipe = strawberryCake,
                         recipeId = id,
                         viewModel = viewModel,
                         onCancel = {

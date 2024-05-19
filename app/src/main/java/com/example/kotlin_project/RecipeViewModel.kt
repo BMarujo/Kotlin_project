@@ -1,6 +1,8 @@
 package com.example.kotlin_project
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -8,7 +10,10 @@ import com.example.kotlin_project.data.RecipesRepository
 import com.example.kotlin_project.data.Recipe
 import com.example.kotlin_project.data.Ingredient
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 
 class RecipeViewModel(private val repository: RecipesRepository) : ViewModel() {
 
@@ -69,6 +74,27 @@ class RecipeViewModel(private val repository: RecipesRepository) : ViewModel() {
     fun updateIngredient(ingredient: Ingredient) {
         viewModelScope.launch {
             repository.updateIngredient(ingredient)
+        }
+    }
+    private val _recipe = MutableStateFlow<Recipe?>(null)
+    val recipe: StateFlow<Recipe?> = _recipe.asStateFlow()
+
+    private val _ingredients = MutableStateFlow<List<Ingredient>>(emptyList())
+    val ingredients: StateFlow<List<Ingredient>> = _ingredients.asStateFlow()
+
+    fun getRecipeById(recipeId: Int) {
+        viewModelScope.launch {
+            repository.getRecipeById(recipeId).collect { recipe ->
+                _recipe.value = recipe
+            }
+        }
+    }
+
+    fun getIngredientsByNames(ingredientNames: List<String>) {
+        viewModelScope.launch {
+            repository.getIngredientsByNames(ingredientNames).collect { ingredients ->
+                _ingredients.value = ingredients
+            }
         }
     }
 }

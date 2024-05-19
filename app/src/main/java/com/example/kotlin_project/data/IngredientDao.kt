@@ -24,4 +24,7 @@ interface IngredientDao {
 
     @Query("SELECT * from Ingredients WHERE id = :id")
     fun getIngredient(id: Int): Flow<Ingredient?>
+
+    @Query("SELECT * FROM ingredients WHERE name IN (:ingredientNames)")
+    fun getIngredientsByNames(ingredientNames: List<String>): Flow<List<Ingredient>>
 }
