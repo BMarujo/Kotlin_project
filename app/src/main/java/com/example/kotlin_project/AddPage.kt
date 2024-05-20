@@ -10,7 +10,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +30,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -54,6 +52,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.example.kotlin_project.data.Ingredient
 import com.example.kotlin_project.data.RecipesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -72,7 +71,7 @@ fun AddPage(scope: CoroutineScope, snackbarHostState: SnackbarHostState, recipes
         }
 
         composable(route = Screen.AddItem.route){
-            AddItemScreen(navController, scope, snackbarHostState)
+            AddItemScreen(navController, scope, snackbarHostState,  viewModel = RecipeViewModel(recipesRepository))
         }
 
         composable(route = Screen.AddRecipe.route){
@@ -111,17 +110,14 @@ fun ChooseItemOrRecipeScreen(navController: NavHostController) {
         }
     }
 }
-
 @Composable
-fun AddItemScreen(navController: NavController, scope: CoroutineScope, snackbarHostState: SnackbarHostState, context: Context = LocalContext.current){
-    // image
-    @DrawableRes val newiconResource = R.drawable.flour // mudar para um icone de tipo n selecionado, isto é, quando é null
+fun AddItemScreen(navController: NavController, scope: CoroutineScope, snackbarHostState: SnackbarHostState, context: Context = LocalContext.current, viewModel: RecipeViewModel) {
     val newtitle = remember { mutableStateOf("") }
-    val newquantity = remember { mutableIntStateOf(0) }
+    val newquantity = remember { mutableStateOf("") }
     val newunit = remember { mutableStateOf("") }
 
-    val dialog = remember { mutableStateOf(false) }
-
+    val result = remember { mutableStateOf<Uri?>(null) }
+    // Function to save the ingredient information and image locally
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -130,6 +126,7 @@ fun AddItemScreen(navController: NavController, scope: CoroutineScope, snackbarH
         contentPadding = PaddingValues(top = 0.dp), state = rememberLazyListState(),
     ) {
         item {
+            // Other UI components...
             Button(onClick = { navController.navigate(Screen.ChooseItemOrRecipe.route) }) {
                 Text("Go Back")
             }
@@ -151,7 +148,6 @@ fun AddItemScreen(navController: NavController, scope: CoroutineScope, snackbarH
                         .padding(16.dp)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                    val result = remember { mutableStateOf<Uri?>(null) }
                     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
                         result.value = it
                     }
@@ -211,38 +207,73 @@ fun AddItemScreen(navController: NavController, scope: CoroutineScope, snackbarH
             }
             Spacer(modifier = Modifier.height(16.dp))
             TextField(
-                value = "",
+                value = newtitle.value,
                 onValueChange = { newtitle.value = it },
                 label = { Text("New Ingredient Name") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             TextField(
-                value = "",
-                onValueChange = { newquantity.value = it.toInt() },
+                value = newquantity.value.toString(),
+                onValueChange = { newquantity.value = it },
                 label = { Text("New Ingredient Quantity") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             TextField(
-                value = "",
+                value = newunit.value,
                 onValueChange = { newunit.value = it },
                 label = { Text("Unit of Measurement") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = {
+                onClick ={if (newtitle.value.isNotBlank() && newquantity.value.toDouble() > 0 && newunit.value.isNotBlank() ) {
+
+                    val imageUri = saveImageToInternalStorage(context, result.value, newtitle.value)
+                    val ingredient = Ingredient(
+                        name = newtitle.value,
+                        quantity = newquantity.value.toDouble(),
+                        measurement = newunit.value,
+                        imageUrl = imageUri.toString() // Convert Uri to string for storage
+                    )
+
+                    // Save the ingredient in the database
+                    viewModel.insertIngredient(ingredient)
+
+                    // Show a snackbar to indicate that the ingredient was added successfully
                     scope.launch {
                         snackbarHostState.showSnackbar("Ingredient added successfully!")
                     }
-                },
+                } else {
+                    // Show an error message if any field is empty
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Please fill in all fields and select an image.")
+                    }
+                } }, // Call the saveIngredient function when the button is clicked
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Save Ingredient")
             }
         }
     }
+}
+
+private fun saveImageToInternalStorage(context: Context, imageUri: Uri?, img_name: String): Uri? {
+    if (imageUri != null) {
+        try {
+            val inputStream = context.contentResolver.openInputStream(imageUri)
+            val fileName = img_name
+            val outputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE)
+            inputStream?.copyTo(outputStream)
+            inputStream?.close()
+            outputStream.close()
+            return Uri.fromFile(File(context.filesDir, fileName))
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+    return null
 }
 // IDK if its working
 /*
