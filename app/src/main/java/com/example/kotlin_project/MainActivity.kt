@@ -183,7 +183,7 @@ fun HomePage(recipesRepository: RecipesRepository) {
                 0 -> AmbientTemperatureSensor()
                 1 -> RecipesScreen(recipesRepository)
                 2 -> HomeScreen()
-                3 -> InventoryManagement()
+                3 -> InventoryManagement( viewModel = RecipeViewModel(recipesRepository))
                 4 -> AddPage(scope, snackbarHostState, recipesRepository)
                 5 -> TimerScreen(modifier = Modifier.padding(it),
                     timerState = timerState,

@@ -79,7 +79,7 @@ fun AddPage(scope: CoroutineScope, snackbarHostState: SnackbarHostState, recipes
         }
 
         composable(route = Screen.Inventory.route){
-            InventoryManagement()
+            InventoryManagement(viewModel = RecipeViewModel(recipesRepository))
         }
     }
 }

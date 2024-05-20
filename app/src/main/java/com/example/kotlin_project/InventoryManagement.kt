@@ -26,6 +26,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,61 +49,39 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import coil.compose.rememberImagePainter
+import com.example.kotlin_project.data.Ingredient
 
-data class InvIngredient(@DrawableRes val image: Int, val title: String, val quantity: Int, val unit: String)
-val Inventoryingredients = listOf(
-    // image, title, quantity
-    InvIngredient(R.drawable.flour, "Chicken", 1, "kg"),
-    InvIngredient(R.drawable.juice, "Carrot", 200, "Units"),
-    InvIngredient(R.drawable.flour, "Beef", 500, "g"),
-    InvIngredient(R.drawable.flour, "Onion", 100, "Units"),
-    InvIngredient(R.drawable.flour, "Potato", 300, "g"),
-    InvIngredient(R.drawable.flour, "Pepper", 50, "g"),
-    InvIngredient(R.drawable.flour, "Salt", 100, "g"),
-    InvIngredient(R.drawable.flour, "Sugar", 200, "g"),
-    InvIngredient(R.drawable.flour, "Flour", 500, "g"),
-    InvIngredient(R.drawable.flour, "Milk", 1, "L"),
-    InvIngredient(R.drawable.flour, "Egg", 12, "Units"),
-    InvIngredient(R.drawable.flour, "Butter", 200, "g"),
-    InvIngredient(R.drawable.flour, "Cheese", 500, "g"),
-    InvIngredient(R.drawable.flour, "Bread", 1, "kg"),
-    InvIngredient(R.drawable.flour, "Rice", 1, "kg"),
-    InvIngredient(R.drawable.flour, "Pasta", 500, "g"),
-    InvIngredient(R.drawable.flour, "Spaghetti", 500, "g"),
-    InvIngredient(R.drawable.flour, "Apple", 1, "Units"),
-    InvIngredient(R.drawable.flour, "Banana", 1, "Units"),
-    InvIngredient(R.drawable.flour,"Orange", 1, "Units"),
-)
 
 @Composable
-fun InventoryManagement() {
+fun InventoryManagement(viewModel: RecipeViewModel ) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.Inventory.route){
-        composable(route = Screen.Inventory.route){
-            InventoryScreen(navController)
+    NavHost(navController = navController, startDestination = Screen.Inventory.route) {
+        composable(route = Screen.Inventory.route) {
+            InventoryScreen(navController, viewModel)
         }
         composable(
-            route = Screen.ItemConfiguration.route + "/{itemimage}/{itemtitle}/{itemquantity}/{itemunit}",
+            route = Screen.ItemConfiguration.route + "/{iconResource}/{title}/{quantity}/{unit}",
             arguments = listOf(
-                navArgument("itemimage") { type = NavType.ReferenceType },
-                navArgument("itemtitle") { type = NavType.StringType },
-                navArgument("itemquantity") { type = NavType.IntType },
-                navArgument("itemunit") { type = NavType.StringType }
+                navArgument("iconResource") { type = NavType.StringType },
+                navArgument("title") { type = NavType.StringType },
+                navArgument("quantity") { type = NavType.FloatType },
+                navArgument("unit") { type = NavType.StringType }
             )
-        ) {entry ->
-            ConfigurationPage(
-                iconResource = entry.arguments?.getInt("itemimage") ?: R.drawable.flour,
-                title = entry.arguments?.getString("itemtitle") ?: "Flour",
-                quantity = entry.arguments?.getInt("itemquantity") ?: 500,
-                unit = entry.arguments?.getString("itemunit") ?: "g",
-                navController = navController
-            )
+        ) { entry ->
+            val iconResource = entry.arguments?.getString("iconResource") ?: ""
+            val title = entry.arguments?.getString("title") ?: ""
+            val quantity = entry.arguments?.getDouble("quantity") ?: 0.0
+            val unit = entry.arguments?.getString("unit") ?: ""
+
+            ConfigurationPage(iconResource, title, quantity, unit, navController, viewModel)
         }
     }
 }
-
 @Composable
-fun InventoryScreen(navController: NavController){
+fun InventoryScreen(navController: NavController, viewModel: RecipeViewModel) {
+    val ingredients by viewModel.allIngredients.collectAsState()
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -110,8 +91,7 @@ fun InventoryScreen(navController: NavController){
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-        LazyColumn(contentPadding = PaddingValues(top = 0.dp), state = rememberLazyListState())
-        {
+        LazyColumn(contentPadding = PaddingValues(top = 0.dp), state = rememberLazyListState()) {
             item {
                 Box(
                     modifier = Modifier
@@ -149,16 +129,16 @@ fun InventoryScreen(navController: NavController){
                         )
                     }
                 }
-                InventoryIngredients(inventoryingredients = Inventoryingredients, navController = navController)
+                InventoryIngredients(inventoryingredients = ingredients, navController = navController)
             }
         }
     }
 }
 
 @Composable
-fun InventoryIngredients(inventoryingredients: List<InvIngredient>, navController: NavController) {
+fun InventoryIngredients(inventoryingredients: List<Ingredient>, navController: NavController) {
     EasyGridInv(nColumns = 3, items = inventoryingredients) {
-        IngredientCardInv(it.image, it.title, it.quantity, it.unit, Modifier,navController = navController)
+        IngredientCardInv(it.imageUrl, it.name, it.quantity, it.measurement, Modifier,navController = navController)
     }
 }
 
@@ -184,12 +164,11 @@ fun <T> EasyGridInv(nColumns: Int, items: List<T>, content: @Composable (T) -> U
         }
     }
 }
-
 @Composable
 fun IngredientCardInv(
-    @DrawableRes iconResource: Int,
+    iconResource: String,
     title: String,
-    quantity: Int,
+    quantity: Double,
     unit: String,
     modifier: Modifier,
     navController: NavController
@@ -199,15 +178,15 @@ fun IngredientCardInv(
         modifier = modifier
             .padding(bottom = 16.dp)
             .clickable(
-            onClick = {
-                navController.navigate(Screen.ItemConfiguration.withArgs(
-                    iconResource.toString(),
-                    title,
-                    quantity.toString(),
-                    unit,
-                ))
-            }
-        )
+                onClick = {
+                    navController.navigate(Screen.ItemConfiguration.withArgs(
+                        iconResource,
+                        title,
+                        quantity.toString(),
+                        unit
+                    ))
+                }
+            )
     ) {
         Card(
             shape = Shapes.large,
@@ -217,7 +196,7 @@ fun IngredientCardInv(
                 .padding(bottom = 8.dp)
         ) {
             Image(
-                painter = painterResource(id = iconResource),
+                painter = rememberImagePainter(iconResource),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(10.dp)
@@ -243,21 +222,23 @@ fun IngredientCardInv(
     }
 }
 
-var dialog = mutableStateOf(false)
 @Composable
-fun ConfigurationPage(@DrawableRes iconResource: Int,
-                      title: String,
-                      quantity: Int,
-                      unit: String,
-                      navController: NavController) {
+fun ConfigurationPage(
+    iconResource: String,
+    title: String,
+    quantity: Double,
+    unit: String,
+    navController: NavController,
+    viewModel: RecipeViewModel
+) {
+    val newTitle = remember { mutableStateOf(title) }
+    val newQuantity = remember { mutableStateOf(quantity.toString()) }
+    val newUnit = remember { mutableStateOf(unit) }
+    val dialogState = remember { mutableStateOf(false) }
 
-    // image
-    @DrawableRes val newiconResource = remember { mutableStateOf(iconResource) } // por agora n é editavel, visto q é preciso incluir camera
-    val newtitle = remember { mutableStateOf(title) }
-    val newquantity = remember { mutableIntStateOf(quantity) }
-    val newunit = remember { mutableStateOf(unit) }
-
-
+    if (dialogState.value) {
+        showDialog(dialogState)
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -281,7 +262,7 @@ fun ConfigurationPage(@DrawableRes iconResource: Int,
                     modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally)
                 ) {
                     Image(
-                        painter = painterResource(id = iconResource),
+                        painter = rememberImagePainter(iconResource),
                         contentDescription = null,
                         modifier = Modifier
                             .padding(10.dp)
@@ -297,7 +278,7 @@ fun ConfigurationPage(@DrawableRes iconResource: Int,
                         color = Color.Black
                     )
                     Text(
-                        text = "${quantity} ${unit}",
+                        text = "$quantity $unit",
                         fontSize = 14.sp,
                         color = Color.Black
                     )
@@ -305,28 +286,28 @@ fun ConfigurationPage(@DrawableRes iconResource: Int,
             }
             Spacer(modifier = Modifier.height(16.dp))
             TextField(
-                value = "",
-                onValueChange = { newtitle.value = it },
+                value = newTitle.value,
+                onValueChange = { newTitle.value = it },
                 label = { Text("Novo nome do item") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             TextField(
-                value = "",
-                onValueChange = { newquantity.value = it.toInt() },
+                value = newQuantity.value,
+                onValueChange = { newQuantity.value = it },
                 label = { Text("Nova quantidade do item") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             TextField(
-                value = "",
-                onValueChange = { newunit.value = it },
+                value = newUnit.value,
+                onValueChange = { newUnit.value = it },
                 label = { Text("Nova unidade do item") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { dialog.value = true },
+                onClick = { dialogState.value = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Red,
@@ -337,8 +318,17 @@ fun ConfigurationPage(@DrawableRes iconResource: Int,
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                // go back to inventory page
-                onClick = { },
+                onClick = {
+                    viewModel.updateIngredient(
+                        Ingredient(
+                            imageUrl = iconResource,
+                            name = newTitle.value,
+                            quantity = newQuantity.value.toDouble(),
+                            measurement = newUnit.value
+                        )
+                    )
+                    navController.popBackStack()
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Green,
@@ -347,10 +337,8 @@ fun ConfigurationPage(@DrawableRes iconResource: Int,
             ) {
                 Text("Guardar alterações")
             }
-            // cancelar
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                // go back to inventory page
                 onClick = { navController.popBackStack() },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
@@ -360,45 +348,32 @@ fun ConfigurationPage(@DrawableRes iconResource: Int,
             ) {
                 Text("Cancelar")
             }
-            if (dialog.value) {
-                showdialog()
-            }
         }
     }
 }
 
 @Composable
-fun showdialog(){
-    val openAlertDialog = remember { mutableStateOf(true) }
-    // dialog to confirm item removal
-    when {
-        openAlertDialog.value -> {
-            AlertDialog(
-                onDismissRequest = { /* handle dialog close event */ },
-                title = {
-                    Text(text = "Remover Item")
-                },
-                text = {
-                    Text("Tem a certeza que deseja remover este item?")
-                },
-                confirmButton = {
-                    Button(
-                        onClick = { /* handle item removal */ }
-                    ) {
-                        Text("Remover")
-                    }
-                },
-                dismissButton = {
-                    Button(
-                        onClick = { // close dialog
-                            openAlertDialog.value = false
-                            dialog.value = false
-                        }
-                    ) {
-                        Text("Cancelar")
-                    }
+fun showDialog(dialogState: MutableState<Boolean>) {
+    AlertDialog(
+        onDismissRequest = { dialogState.value = false },
+        title = { Text(text = "Remover Item") },
+        text = { Text("Tem a certeza que deseja remover este item?") },
+        confirmButton = {
+            Button(
+                onClick = {
+                    // Handle item removal
+                    dialogState.value = false
                 }
-            )
+            ) {
+                Text("Remover")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = { dialogState.value = false }
+            ) {
+                Text("Cancelar")
+            }
         }
-    }
+    )
 }
