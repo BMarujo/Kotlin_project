@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Kotlin_Project</string>
+    <string name="timer_running_channel_name">Timer running channel</string>
+    <string name="timer_running_channel_description">Shows a persistent notification when the timer is running</string>
+    <string name="timer_completed_channel_name">Timer completed notifications</string>
+    <string name="timer_completed_channel_description">Shows a notification when a countdown timer finishes</string>
+    <string name="is_done">is_done</string>
+    <string name="timer">Control your cooking time!</string>
+    <string name="hours">Hours</string>
+    <string name="minutes">Minutes</string>
+    <string name="seconds">Seconds</string>
+    <string name="start">Start</string>
+    <string name="cancel">Cancel</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
 </resources>

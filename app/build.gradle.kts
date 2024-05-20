@@ -2,16 +2,19 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
-    id("com.google.devtools.ksp") version "1.9.20-1.0.14"
+    id("com.google.devtools.ksp")
+    id("dagger.hilt.android.plugin")
+    id("kotlin-kapt")
 }
 
+@Suppress("UnstableApiUsage")
 android {
     namespace = "com.example.kotlin_project"
     compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.kotlin_project"
-        minSdk = 28
+        minSdk = 29
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -42,7 +45,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.9"
     }
     packaging {
         resources {
@@ -87,8 +90,28 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("com.google.accompanist:accompanist-permissions:0.17.0")
+
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
+    implementation("androidx.compose.runtime:runtime-livedata:${rootProject.extra.get("composeVersion")}")
+    // Zhuinden flow-combinetuple
+    implementation("com.github.Zhuinden:flow-combinetuple-kt:1.1.1")
     //Room
     implementation("androidx.room:room-runtime:${rootProject.extra["room_version"]}")
     ksp("androidx.room:room-compiler:${rootProject.extra["room_version"]}")
     implementation("androidx.room:room-ktx:${rootProject.extra["room_version"]}")
+    // sdp
+    implementation("com.intuit.sdp:sdp-android:1.1.0")
+    // ssp
+    implementation("com.intuit.ssp:ssp-android:1.1.0")
+    // accompanist-permissions
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
+    // materiel-icon
+    implementation("androidx.compose.material:material-icons-extended:1.4.3")
+    implementation("androidx.compose.material:material:1.4.3")
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.47")
+    kapt("com.google.dagger:hilt-compiler:2.47")
+    // work-manager
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
+    implementation("androidx.hilt:hilt-work:1.0.0")
 }

@@ -43,6 +43,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,13 +57,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kotlin_project.data.AppContainer
 import com.example.kotlin_project.data.AppDataContainer
 import com.example.kotlin_project.data.RecipesRepository
+import com.example.kotlin_project.data.model.TimerState
+import com.example.kotlin_project.timer.TimerScreen
+import com.example.kotlin_project.timer.TimerViewModel
 import com.example.kotlin_project.ui.theme.Kotlin_ProjectTheme
 import com.google.accompanist.insets.statusBarsPadding
+import dagger.hilt.android.AndroidEntryPoint
 
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val appContainer: AppContainer by lazy {
         AppDataContainer(context = applicationContext)
@@ -91,8 +98,9 @@ fun HomePage( recipesRepository: RecipesRepository) {
     val icons = listOf(Icons.Filled.Favorite, Icons.Filled.Edit, Icons.Filled.AccountBox, Icons.Filled.List, Icons.Filled.Add)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val timerViewModel: TimerViewModel = viewModel()
+    val timerState by timerViewModel.timerState.observeAsState(TimerState())
     Scaffold(
-
         topBar = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -155,7 +163,9 @@ fun HomePage( recipesRepository: RecipesRepository) {
                 2 -> HomeScreen()
                 3 -> InventoryManagement()
                 4 -> AddPage(scope, snackbarHostState, recipesRepository)
-                5 -> TimerScreen()
+                5 -> TimerScreen(modifier = Modifier.padding(it),
+                    timerState = timerState,
+                    timerActions = timerViewModel)
                 else -> Text("Unknown screen")
             }
 
