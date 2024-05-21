@@ -65,13 +65,13 @@ fun InventoryManagement(viewModel: RecipeViewModel ) {
             arguments = listOf(
                 navArgument("iconResource") { type = NavType.StringType },
                 navArgument("title") { type = NavType.StringType },
-                navArgument("quantity") { type = NavType.FloatType },
+                navArgument("quantity") { type = NavType.StringType },
                 navArgument("unit") { type = NavType.StringType }
             )
         ) { entry ->
             val iconResource = entry.arguments?.getString("iconResource") ?: ""
             val title = entry.arguments?.getString("title") ?: ""
-            val quantity = entry.arguments?.getDouble("quantity") ?: 0.0
+            val quantity = entry.arguments?.getString("quantity")?.toDoubleOrNull() ?: 0.0
             val unit = entry.arguments?.getString("unit") ?: ""
 
             ConfigurationPage(iconResource, title, quantity, unit, navController, viewModel)
@@ -179,12 +179,14 @@ fun IngredientCardInv(
             .padding(bottom = 16.dp)
             .clickable(
                 onClick = {
-                    navController.navigate(Screen.ItemConfiguration.withArgs(
-                        iconResource,
-                        title,
-                        quantity.toString(),
-                        unit
-                    ))
+                    navController.navigate(
+                        Screen.ItemConfiguration.withArgs(
+                            iconResource,
+                            title,
+                            quantity.toString(),
+                            unit
+                        )
+                    )
                 }
             )
     ) {
