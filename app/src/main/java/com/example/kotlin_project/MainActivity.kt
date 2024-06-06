@@ -184,7 +184,7 @@ fun HomePage(recipesRepository: RecipesRepository) {
                 2 -> HomeScreen(selectedItem = selectedItem, onItemSelected = { newItem ->
                     selectedItem = newItem
                 })
-                3 -> InventoryManagement()
+                3 -> InventoryManagement( viewModel = RecipeViewModel(recipesRepository))
                 4 -> AddPage(scope, snackbarHostState, recipesRepository)
                 5 -> TimerScreen(modifier = Modifier.padding(it),
                     timerState = timerState,
