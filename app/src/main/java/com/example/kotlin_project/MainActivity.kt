@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -130,7 +129,7 @@ fun HomePage(recipesRepository: RecipesRepository) {
             ) {
                 CircularButton(
                     R.drawable.baseline_home_24,
-                    onClick = { /* Handle Home button click */ })
+                    onClick = { selectedItem = 2 })
                 Text(text = "Go To Home", style = MaterialTheme.typography.bodySmall)
             }
         },
@@ -182,7 +181,9 @@ fun HomePage(recipesRepository: RecipesRepository) {
             val content = when (selectedItem) {
                 0 -> AmbientTemperatureSensor()
                 1 -> RecipesScreen(recipesRepository)
-                2 -> HomeScreen()
+                2 -> HomeScreen(selectedItem = selectedItem, onItemSelected = { newItem ->
+                    selectedItem = newItem
+                })
                 3 -> InventoryManagement()
                 4 -> AddPage(scope, snackbarHostState, recipesRepository)
                 5 -> TimerScreen(modifier = Modifier.padding(it),
@@ -197,7 +198,7 @@ fun HomePage(recipesRepository: RecipesRepository) {
 
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(selectedItem: Int, onItemSelected: (Int) -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -302,12 +303,12 @@ fun HomeScreen() {
                             )
                         }, trailingContent = {
                             Button(
-                                onClick = { /* Ação ao clicar no botão "Explore more" */ },
+                                onClick = { onItemSelected(3) },
                                 content = { Text("Explore more") },
                                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                                colors = ButtonDefaults.buttonColors(
+                                /*colors = ButtonDefaults.buttonColors(
                                     containerColor = Color.White, contentColor = Color.Black
-                                )
+                                )*/
                             )
                         })
                     }
@@ -344,12 +345,12 @@ fun HomeScreen() {
                             trailingIconColor = Color.Black,
                         ), headlineContent = {
                             Text(
-                                text = "Favorites",
+                                text = "Check Our Sensors!",
                                 fontWeight = FontWeight.Bold,
                             )
                         }, supportingContent = {
                             Text(
-                                text = "See your favorite recipes and add new ones",
+                                text = "Check the temperature and light sensors",
                                 textAlign = TextAlign.Left,
                             )
                         }, leadingContent = {
@@ -359,12 +360,12 @@ fun HomeScreen() {
                             )
                         }, trailingContent = {
                             Button(
-                                onClick = { /* Ação ao clicar no botão "Explore more" */ },
+                                onClick = { onItemSelected(0) },
                                 content = { Text("Explore more") },
                                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                                colors = ButtonDefaults.buttonColors(
+                                /*colors = ButtonDefaults.buttonColors(
                                     containerColor = Color.White, contentColor = Color.Black
-                                )
+                                )*/
                             )
                         })
                     }
@@ -417,12 +418,12 @@ fun HomeScreen() {
                             )
                         }, trailingContent = {
                             Button(
-                                onClick = { /* Ação ao clicar no botão "Explore more" */ },
+                                onClick = { onItemSelected(1) },
                                 content = { Text("Explore more") },
                                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                                colors = ButtonDefaults.buttonColors(
+                                /*colors = ButtonDefaults.buttonColors(
                                     containerColor = Color.White, contentColor = Color.Black
-                                )
+                                )*/
                             )
                         })
                     }
@@ -474,12 +475,12 @@ fun HomeScreen() {
                             )
                         }, trailingContent = {
                             Button(
-                                onClick = { /* Ação ao clicar no botão "Explore more" */ },
+                                onClick = { onItemSelected(4) },
                                 content = { Text("Explore more") },
                                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                                colors = ButtonDefaults.buttonColors(
+                                /*colors = ButtonDefaults.buttonColors(
                                     containerColor = Color.White, contentColor = Color.Black
-                                )
+                                )*/
                             )
                         })
                     }
@@ -519,12 +520,12 @@ fun HomeScreen() {
                             trailingIconColor = Color.Black,
                         ), headlineContent = {
                             Text(
-                                text = "Add Ingredients",
+                                text = "Add Recipes",
                                 fontWeight = FontWeight.Bold,
                             )
                         }, supportingContent = {
                             Text(
-                                text = "Add new ingredients to your inventory",
+                                text = "Add new recipes to your inventory",
                                 textAlign = TextAlign.Left,
                             )
                         }, leadingContent = {
@@ -534,12 +535,12 @@ fun HomeScreen() {
                             )
                         }, trailingContent = {
                             Button(
-                                onClick = { /* Ação ao clicar no botão "Explore more" */ },
+                                onClick = { onItemSelected(4) },
                                 content = { Text("Explore more") },
                                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                                colors = ButtonDefaults.buttonColors(
+                                /*colors = ButtonDefaults.buttonColors(
                                     containerColor = Color.White, contentColor = Color.Black
-                                )
+                                )*/
                             )
                         })
                     }
@@ -576,12 +577,12 @@ fun HomeScreen() {
                             trailingIconColor = Color.Black,
                         ), headlineContent = {
                             Text(
-                                text = "Add Ingredients",
+                                text = "Favorites",
                                 fontWeight = FontWeight.Bold,
                             )
                         }, supportingContent = {
                             Text(
-                                text = "Add new ingredients to your inventory",
+                                text = "See your favorite recipes and add new ones",
                                 textAlign = TextAlign.Left,
                             )
                         }, leadingContent = {
@@ -591,12 +592,12 @@ fun HomeScreen() {
                             )
                         }, trailingContent = {
                             Button(
-                                onClick = { /* Ação ao clicar no botão "Explore more" */ },
+                                onClick = { /*onItemSelected(0)*/ },
                                 content = { Text("Explore more") },
                                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                                colors = ButtonDefaults.buttonColors(
+                                /*colors = ButtonDefaults.buttonColors(
                                     containerColor = Color.White, contentColor = Color.Black
-                                )
+                                )*/
                             )
                         })
                     }
@@ -657,6 +658,7 @@ fun AmbientTemperatureSensor() {
 
     val context2 = LocalContext.current
     var temperature2 by remember { mutableStateOf("0") }
+    val temperatureAsDouble: Double? = temperature2.toDoubleOrNull()
     var isSensorRunning2 by remember { mutableStateOf(false) }
     var sensorAvailable2 by remember { mutableStateOf(true) }
     val sensorManager2 = context2.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -727,6 +729,16 @@ fun AmbientTemperatureSensor() {
         if (sensorAvailable2) {
             Text(text = "Light: $temperature2")
             Spacer(modifier = Modifier.height(20.dp))
+            if (temperatureAsDouble != null) {
+                if (temperatureAsDouble == 0.0) {
+                    Text(text = "No light detected", textAlign = TextAlign.Center, color = Color.Red)
+                }
+            }
+            if (temperatureAsDouble != null) {
+                if (temperatureAsDouble <= 300 && temperatureAsDouble > 0) {
+                    Text(text = "Ensure you have proper lighting to handle sharp objects and hot surfaces", textAlign = TextAlign.Center, color = Color.Red)
+                }
+            }
             Button(onClick = {
                 if (isSensorRunning2) {
                     stopSensor2()
