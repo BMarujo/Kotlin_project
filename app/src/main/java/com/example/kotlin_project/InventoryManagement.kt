@@ -61,7 +61,7 @@ fun InventoryManagement(viewModel: RecipeViewModel ) {
             InventoryScreen(navController, viewModel)
         }
         composable(
-            route = Screen.ItemConfiguration.route + "/{iconResource}/{title}/{quantity}/{unit}",
+            route = Screen.ItemConfiguration.route + "/{iconResource}/{title}/{quantity}/{unit}/{ingredient}",
             arguments = listOf(
                 navArgument("iconResource") { type = NavType.StringType },
                 navArgument("title") { type = NavType.StringType },
@@ -73,8 +73,9 @@ fun InventoryManagement(viewModel: RecipeViewModel ) {
             val title = entry.arguments?.getString("title") ?: ""
             val quantity = entry.arguments?.getString("quantity")?.toDoubleOrNull() ?: 0.0
             val unit = entry.arguments?.getString("unit") ?: ""
+            val ingredient_id = entry.arguments?.getString("ingredient")?.toIntOrNull() ?: 0
 
-            ConfigurationPage(iconResource, title, quantity, unit, navController, viewModel)
+            ConfigurationPage(iconResource, title, quantity, unit, navController, viewModel, ingredient_id)
         }
     }
 }
@@ -138,7 +139,7 @@ fun InventoryScreen(navController: NavController, viewModel: RecipeViewModel) {
 @Composable
 fun InventoryIngredients(inventoryingredients: List<Ingredient>, navController: NavController) {
     EasyGridInv(nColumns = 3, items = inventoryingredients) {
-        IngredientCardInv(it.imageUrl, it.name, it.quantity, it.measurement, Modifier,navController = navController)
+        IngredientCardInv(it.imageUrl, it.name, it.quantity, it.measurement, Modifier,navController = navController, it.id)
     }
 }
 
@@ -171,7 +172,9 @@ fun IngredientCardInv(
     quantity: Double,
     unit: String,
     modifier: Modifier,
-    navController: NavController
+    navController: NavController,
+    ingredient_id: Int
+
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -184,7 +187,8 @@ fun IngredientCardInv(
                             iconResource,
                             title,
                             quantity.toString(),
-                            unit
+                            unit,
+                            ingredient_id.toString(),
                         )
                     )
                 }
@@ -231,7 +235,8 @@ fun ConfigurationPage(
     quantity: Double,
     unit: String,
     navController: NavController,
-    viewModel: RecipeViewModel
+    viewModel: RecipeViewModel,
+    ingredient_id: Int
 ) {
     val newTitle = remember { mutableStateOf(title) }
     val newQuantity = remember { mutableStateOf(quantity.toString()) }
@@ -239,7 +244,7 @@ fun ConfigurationPage(
     val dialogState = remember { mutableStateOf(false) }
 
     if (dialogState.value) {
-        showDialog(dialogState)
+        showDialog(dialogState, viewModel, title, quantity, unit, ingredient_id, navController, iconResource)
     }
 
     LazyColumn(
@@ -326,7 +331,8 @@ fun ConfigurationPage(
                             imageUrl = iconResource,
                             name = newTitle.value,
                             quantity = newQuantity.value.toDouble(),
-                            measurement = newUnit.value
+                            measurement = newUnit.value,
+                            id = ingredient_id
                         )
                     )
                     navController.popBackStack()
@@ -355,7 +361,7 @@ fun ConfigurationPage(
 }
 
 @Composable
-fun showDialog(dialogState: MutableState<Boolean>) {
+fun showDialog(dialogState: MutableState<Boolean>, viewModel: RecipeViewModel, title: String, quantity: Double, unit: String, ingredient_id: Int, navController: NavController, iconResource: String) {
     AlertDialog(
         onDismissRequest = { dialogState.value = false },
         title = { Text(text = "Remover Item") },
@@ -364,7 +370,17 @@ fun showDialog(dialogState: MutableState<Boolean>) {
             Button(
                 onClick = {
                     // Handle item removal
+                    viewModel.deleteIngredient (
+                        Ingredient(
+                            imageUrl = iconResource,
+                            name = title,
+                            quantity = quantity,
+                            measurement = unit,
+                            id = ingredient_id
+                        )
+                    )
                     dialogState.value = false
+                    navController.popBackStack()
                 }
             ) {
                 Text("Remover")
