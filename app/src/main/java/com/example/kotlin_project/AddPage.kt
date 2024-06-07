@@ -71,15 +71,15 @@ fun AddPage(scope: CoroutineScope, snackbarHostState: SnackbarHostState, recipes
         }
 
         composable(route = Screen.AddItem.route){
-            AddItemScreen(navController, scope, snackbarHostState,  viewModel = RecipeViewModel(recipesRepository))
+            AddItemScreen(navController, scope, snackbarHostState,  viewModel = RecipeViewModel(recipesRepository, context = LocalContext.current))
         }
 
         composable(route = Screen.AddRecipe.route){
-            AddRecipePage(navController, scope, snackbarHostState, viewModel = RecipeViewModel(recipesRepository))
+            AddRecipePage(navController, scope, snackbarHostState, viewModel = RecipeViewModel(recipesRepository, context = LocalContext.current))
         }
 
         composable(route = Screen.Inventory.route){
-            InventoryManagement(viewModel = RecipeViewModel(recipesRepository))
+            InventoryManagement(viewModel = RecipeViewModel(recipesRepository, context = LocalContext.current))
         }
     }
 }

@@ -64,7 +64,7 @@ fun MainFragment(recipeId: Int, viewModel: RecipeViewModel = viewModel(), onCanc
                 modifier = Modifier.fillMaxSize(), color = White
             ) {
                 Box {
-                    Content(recipe, ingredients, rememberLazyListState(), onCancel)
+                    Content(recipe, ingredients, rememberLazyListState(), onCancel, viewModel = viewModel)
                 }
             }
         }
@@ -94,7 +94,7 @@ fun CircularButton(
 
 @Composable
 fun Content(
-    recipe: Recipe, ingredients: List<Ingredient>, scrollState: LazyListState, onCancel: () -> Unit
+    recipe: Recipe, ingredients: List<Ingredient>, scrollState: LazyListState, onCancel: () -> Unit, viewModel: RecipeViewModel
 ) {
     LazyColumn(contentPadding = PaddingValues(top = 0.dp), state = scrollState) {
         item {
@@ -107,7 +107,6 @@ fun Content(
                     .padding(horizontal = 16.dp)
             ) {
                 CircularButton(iconResource = R.drawable.ic_arrow_back, onClick = onCancel)
-                CircularButton(R.drawable.ic_favorite)
             }
             Image(
                 painter = rememberImagePainter(recipe.imageUrl),
@@ -136,15 +135,15 @@ fun Content(
             Description(recipe)
             IngredientsHeader()
             IngredientsList(ingredients)
-            RemoveIngredientsButton()
+            Read_Button(recipe.description, viewModel = viewModel)
         }
     }
 }
 
 @Composable
-fun RemoveIngredientsButton() {
+fun Read_Button(description: String, viewModel: RecipeViewModel) {
     Button(
-        onClick = { /*TODO*/ },
+        onClick = { viewModel.readDescription(description)},
         elevation = null,
         shape = Shapes.small,
         colors = ButtonDefaults.buttonColors(
@@ -154,9 +153,8 @@ fun RemoveIngredientsButton() {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text(text = "Remove the Ingredients quantity", modifier = Modifier.padding(8.dp))
+        Text(text = "Read Instructions Out Loud", modifier = Modifier.padding(8.dp))
     }
-
 }
 
 @Composable

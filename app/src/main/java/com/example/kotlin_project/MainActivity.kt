@@ -178,13 +178,14 @@ fun HomePage(recipesRepository: RecipesRepository) {
             //.padding(it) // <<-- or simply this
         ) {
             // Home Screen content
+            val applicationContext = LocalContext.current
             val content = when (selectedItem) {
                 0 -> AmbientTemperatureSensor()
                 1 -> RecipesScreen(recipesRepository)
                 2 -> HomeScreen(selectedItem = selectedItem, onItemSelected = { newItem ->
                     selectedItem = newItem
                 })
-                3 -> InventoryManagement( viewModel = RecipeViewModel(recipesRepository))
+                3 -> InventoryManagement( viewModel = RecipeViewModel(recipesRepository, context = applicationContext))
                 4 -> AddPage(scope, snackbarHostState, recipesRepository)
                 5 -> TimerScreen(modifier = Modifier.padding(it),
                     timerState = timerState,

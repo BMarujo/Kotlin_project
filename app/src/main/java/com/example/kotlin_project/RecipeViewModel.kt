@@ -1,10 +1,7 @@
 package com.example.kotlin_project
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import com.example.kotlin_project.data.RecipesRepository
 import com.example.kotlin_project.data.Recipe
@@ -13,9 +10,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import android.speech.tts.TextToSpeech
+import android.speech.tts.TextToSpeech.OnInitListener
+import java.util.Locale
 
-class RecipeViewModel(private val repository: RecipesRepository) : ViewModel() {
+class RecipeViewModel(private val repository: RecipesRepository, private val context: android.content.Context) : ViewModel() {
 
     private val _allRecipes: MutableStateFlow<List<Recipe>> = MutableStateFlow(emptyList())
     val allRecipes: StateFlow<List<Recipe>> = _allRecipes
@@ -25,6 +26,7 @@ class RecipeViewModel(private val repository: RecipesRepository) : ViewModel() {
 
     init {
         observeRepositoryChanges()
+        initializeTextToSpeech()
     }
 
     private fun observeRepositoryChanges() {
@@ -97,5 +99,33 @@ class RecipeViewModel(private val repository: RecipesRepository) : ViewModel() {
             }
         }
     }
+    private val searchQuery = MutableStateFlow("")
+
+    val filteredRecipes: StateFlow<List<Recipe>> = combine(allRecipes, searchQuery) { recipes, query ->
+        if (query.isBlank()) {
+            recipes
+        } else {
+            recipes.filter { it.name.contains(query, ignoreCase = true) }
+        }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    fun setSearchQuery(query: String) {
+        searchQuery.value = query
+    }
+
+
+    private lateinit var textToSpeech: TextToSpeech
+
+    private fun initializeTextToSpeech() {
+        textToSpeech = TextToSpeech(context, OnInitListener { status ->
+            if (status != TextToSpeech.ERROR) {
+                textToSpeech.language = Locale.UK
+            }
+        })
+    }
+    fun readDescription(description: String) {
+        textToSpeech.speak(description, TextToSpeech.QUEUE_FLUSH, null, null)
+    }
+
 }
 

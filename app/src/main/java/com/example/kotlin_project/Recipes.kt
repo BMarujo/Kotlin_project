@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.LightGray
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,7 +59,7 @@ fun RecipesScreen(
     ) {
         composable(route = RecipesScreenEnum.Recipes.name) {
             MainRecipesScreen(
-                viewModel = RecipeViewModel(recipesRepository),
+                viewModel = RecipeViewModel(recipesRepository, context = LocalContext.current),
                 navController = navController
 
             )
@@ -68,7 +69,7 @@ fun RecipesScreen(
             arguments = listOf(navArgument("recipeId") { type = NavType.IntType })
         ) { navBackStackEntry ->
             val recipeId = navBackStackEntry.arguments?.getInt("recipeId")
-            val viewModel = RecipeViewModel(recipesRepository)
+            val viewModel = RecipeViewModel(recipesRepository, context = LocalContext.current)
 
                 recipeId?.let { id ->
                     MainFragment(
@@ -89,7 +90,8 @@ fun MainRecipesScreen(
     viewModel: RecipeViewModel,
     navController: NavHostController
 ) {
-    val allRecipes by viewModel.allRecipes.collectAsState(initial = emptyList())
+    //val allRecipes by viewModel.allRecipes.collectAsState(initial = emptyList())
+    val filteredRecipes by viewModel.filteredRecipes.collectAsState()
 
     LazyColumn(modifier = Modifier.padding(8.dp)) {
         item {
@@ -99,8 +101,8 @@ fun MainRecipesScreen(
                 fontSize = 32.sp,
                 modifier = Modifier.padding(8.dp)
             )
-            SearchComponent()
-            allRecipes.forEach { recipe ->
+            SearchComponent(viewModel = viewModel)
+            filteredRecipes.forEach { recipe ->
                 RecipeListItem(
                     recipe = recipe,
                     navController = navController
@@ -110,18 +112,20 @@ fun MainRecipesScreen(
     }
 }
 @Composable
-fun SearchComponent() {
+fun SearchComponent(viewModel: RecipeViewModel) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
     ) {
-
         var text by remember { mutableStateOf("") }
 
         OutlinedTextField(
             value = text,
-            onValueChange = { text = it },
+            onValueChange = {
+                text = it
+                viewModel.setSearchQuery(it)
+            },
             label = { Text("Search") },
             leadingIcon = {
                 Icon(
@@ -132,10 +136,9 @@ fun SearchComponent() {
             },
             modifier = Modifier.fillMaxWidth()
         )
-
-
     }
 }
+
 @Composable
 fun RecipeListItem(
     recipe: Recipe,
