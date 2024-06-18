@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -54,6 +55,8 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.kotlin_project.data.Ingredient
 import com.example.kotlin_project.data.RecipesRepository
+import com.example.kotlin_project.util.StorageUtil
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.io.File
@@ -241,10 +244,36 @@ fun AddItemScreen(navController: NavController, scope: CoroutineScope, snackbarH
                     // Save the ingredient in the database
                     viewModel.insertIngredient(ingredient)
 
-                    // Show a snackbar to indicate that the ingredient was added successfully
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Ingredient added successfully!")
+                    // Save the ingredient in the Firebase
+                    (context as ComponentActivity).lifecycleScope.launch {
+                        val downloadUrl = imageUri?.let {
+                            StorageUtil.uploadToStorage(
+                                it,
+                                context,
+                                "image"
+                            )
+                        }
+                        if (downloadUrl != null) {
+                            //println("File uploaded successfully: $downloadUrl")
+
+                            val db = FirebaseFirestore.getInstance()
+                            val data = hashMapOf(
+                                "name" to ingredient.name,
+                                "quantity" to ingredient.quantity,
+                                "measurement" to ingredient.measurement,
+                                "imageUrl" to downloadUrl
+                            )
+                            db.collection("IngredientsData").add(data)
+
+                            // Show a snackbar to indicate that the ingredient was added successfully
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Ingredient added successfully!")
+                            }
+                        } else {
+                            println("File upload failed")
+                        }
                     }
+
                 } else {
                     // Show an error message if any field is empty
                     scope.launch {

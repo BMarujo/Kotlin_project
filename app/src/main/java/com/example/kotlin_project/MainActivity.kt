@@ -1,13 +1,16 @@
 package com.example.kotlin_project
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -69,6 +72,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kotlin_project.data.AppContainer
@@ -99,6 +103,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        checkNotificationPermission(this)
     }
 }
 
@@ -752,6 +757,24 @@ fun AmbientTemperatureSensor() {
         } else {
             Text(text = "Light Sensor not available on this device.")
         }
+    }
+}
+
+fun checkNotificationPermission(context: Context) {
+    val areNotificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+
+    if (!areNotificationsEnabled) {
+        AlertDialog.Builder(context)
+            .setTitle("Enable Notifications")
+            .setMessage("Please enable notifications for our app in your system settings.")
+            .setPositiveButton("Go to settings") { _, _ ->
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+                context.startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }
 

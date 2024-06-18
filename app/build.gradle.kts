@@ -5,6 +5,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("dagger.hilt.android.plugin")
     id("kotlin-kapt")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 @Suppress("UnstableApiUsage")
@@ -57,6 +58,7 @@ android {
 dependencies {
 
     implementation("androidx.core:core-ktx:1.13.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.9.0")
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
@@ -74,6 +76,9 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0")
+    implementation("com.google.code.gson:gson:2.8.8")
 
 
     implementation("androidx.camera:camera-core:1.3.0")
@@ -88,6 +93,7 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-insets:0.17.0")
     implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-storage-ktx")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("com.google.accompanist:accompanist-permissions:0.17.0")
 
@@ -111,7 +117,12 @@ dependencies {
     // Hilt
     implementation("com.google.dagger:hilt-android:2.47")
     kapt("com.google.dagger:hilt-compiler:2.47")
+    implementation("androidx.navigation:navigation-compose:2.4.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0-alpha03")
     // work-manager
     implementation("androidx.work:work-runtime-ktx:2.8.1")
     implementation("androidx.hilt:hilt-work:1.0.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+
 }

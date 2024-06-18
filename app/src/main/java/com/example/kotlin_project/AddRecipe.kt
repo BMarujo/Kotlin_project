@@ -41,10 +41,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.kotlin_project.data.Recipe
+import com.example.kotlin_project.util.StorageUtil.Companion.uploadToStorage
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.io.File
@@ -270,9 +273,30 @@ fun AddRecipePage(navController: NavController, scope: CoroutineScope, snackbarH
                     // Use the RecipeViewModel to insert the recipe into the database
                     viewModel.insertRecipe(recipe)
 
-                    // Show a snackbar to indicate that the recipe was added successfully
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Recipe Added Successfully!")
+                    // Save the recipe to the Firebase
+                    (context as ComponentActivity).lifecycleScope.launch {
+                        val downloadUrl = imageUri?.let { uploadToStorage(it, context, "image") }
+                        if (downloadUrl != null) {
+                            //println("File uploaded successfully: $downloadUrl")
+
+                            val db = FirebaseFirestore.getInstance()
+                            val data = hashMapOf(
+                                "name" to recipe.name,
+                                "category" to recipe.category,
+                                "description" to recipe.description,
+                                "ingredients" to recipe.ingredients,
+                                "timeToCook" to recipe.timeToCook,
+                                "calories" to recipe.calories,
+                                "image" to downloadUrl
+                            )
+                            db.collection("SocialNetworkOfRecipes").add(data)
+
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Recipe Added Successfully!")
+                            }
+                        } else {
+                            println("File upload failed")
+                        }
                     }
             }, modifier = Modifier.fillMaxWidth()) {
                 Text("Add Recipe")

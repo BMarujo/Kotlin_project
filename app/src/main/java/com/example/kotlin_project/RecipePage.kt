@@ -1,5 +1,6 @@
 package com.example.kotlin_project
 
+import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,24 +30,34 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.LightGray
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.example.kotlin_project.data.Ingredient
 import com.example.kotlin_project.data.Recipe
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.statusBarsPadding
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 
 @Composable
 fun MainFragment(recipeId: Int, viewModel: RecipeViewModel = viewModel(), onCancel: () -> Unit) {
@@ -157,6 +168,116 @@ fun Read_Button(description: String, viewModel: RecipeViewModel) {
     }
 }
 
+//For Firebase
+@Composable
+fun MainFragment2(navController: NavHostController, recipeJson: String?, context: Context = LocalContext.current, onCancel: () -> Unit) {
+    val backStackEntry = navController.previousBackStackEntry
+    System.out.println("RecipeJSON:"+recipeJson)
+
+    // Converte a string JSON de volta para um objeto Recipe
+    val recipe = remember {
+            Json.decodeFromString(Recipe.serializer(), recipeJson!!)
+    }
+
+
+    // Query the Firebase to get the ingredients data through its name
+    val ingredientNames = recipe.ingredients.split(", ")
+    val ingredientsState = remember { mutableListOf<IngredientData>() }
+
+    LaunchedEffect(Unit) {
+        val ingredients = fetchIngredients(ingredientNames)
+        ingredientsState.addAll(ingredients)
+    }
+
+
+    ProvideWindowInsets {
+        Surface(
+            modifier = Modifier.fillMaxSize(), color = White
+        ) {
+            Box {
+                recipe?.let {
+                    Content2(it, ingredientsState , rememberLazyListState(), onCancel, navController)
+                } ?: run {
+                    // Exibe uma mensagem de erro ou lida com a situação de alguma forma
+                    Text(text = "Erro: Receita não encontrada.")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Content2(
+    recipe: Recipe, ingredients: List<IngredientData>, scrollState: LazyListState, onCancel: () -> Unit, navController: NavHostController
+) {
+    LazyColumn(contentPadding = PaddingValues(top = 0.dp), state = scrollState) {
+        item {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp)
+            ) {
+                CircularButton(iconResource = R.drawable.ic_arrow_back, onClick = onCancel)
+            }
+            Image(
+                painter = rememberImagePainter(recipe.imageUrl),
+                contentDescription = null,
+                Modifier
+                    .height(200.dp)
+                    .fillMaxWidth(),
+                contentScale = ContentScale.Crop
+            )
+
+            Text(
+                recipe.category,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier
+                    .clip(Shapes.small)
+                    .background(LightGray)
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
+            )
+            Text(
+                recipe.name,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+            )
+            BasicInfo(recipe)
+            Description(recipe)
+            IngredientsHeader()
+            IngredientsList2(ingredients)
+            Read_Button(recipe.description, navController)
+        }
+    }
+}
+
+@Composable
+fun IngredientsList2(ingredients: List<IngredientData>) {
+    EasyGrid(nColumns = 3, items = ingredients) { ingredient ->
+        IngredientCard(ingredient.imageUrl,ingredient.name,ingredient.quantity.toString(),Modifier)
+    }
+}
+
+@Composable
+fun Read_Button(description: String, navController: NavHostController) {
+    Button(
+        onClick = { /* Implement reading description out loud */ },
+        elevation = null,
+        shape = Shapes.small,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = LightGray, contentColor = Color.Black
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text(text = "Read Instructions Out Loud", modifier = Modifier.padding(8.dp))
+    }
+}
+
 @Composable
 fun IngredientsList(ingredients: List<Ingredient>) {
     EasyGrid(nColumns = 3, items = ingredients) {
@@ -190,6 +311,9 @@ fun <T> EasyGrid(nColumns: Int, items: List<T>, content: @Composable (T) -> Unit
 fun IngredientCard(
     iconResource: String, title: String, subtitle: String, modifier: Modifier
 ) {
+    println("Ingredient name: $iconResource")
+    println("Ingredient quantity: $title")
+    println("Ingredient imageUrl: $subtitle:")
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.padding(bottom = 16.dp)
@@ -288,6 +412,32 @@ fun InfoColumn(@DrawableRes iconResource: Int, text: String) {
         )
         Text(text = text, fontWeight = FontWeight.Bold)
     }
+}
+
+suspend fun fetchIngredients(ingredientNames: List<String>): List<IngredientData> {
+    val db = Firebase.firestore
+    val ingredients = mutableListOf<IngredientData>()
+
+    withContext(Dispatchers.IO) {
+        ingredientNames.forEach { ingredientName ->
+            try {
+                val documents = db.collection("IngredientsData")
+                    .whereEqualTo("name", ingredientName)
+                    .get()
+                    .await()
+
+                for (document in documents) {
+                    val ingredient = document.toObject(IngredientData::class.java)
+                    ingredients.add(ingredient)
+                    println("Ingredient added: $ingredient")
+                }
+            } catch (e: Exception) {
+                println("Error getting documents: $e")
+            }
+        }
+    }
+
+    return ingredients
 }
 
 

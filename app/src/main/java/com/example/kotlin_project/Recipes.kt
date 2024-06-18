@@ -1,9 +1,12 @@
 package com.example.kotlin_project
 
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.LightGray
@@ -32,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -41,6 +46,7 @@ import androidx.navigation.navArgument
 import coil.compose.rememberImagePainter
 import com.example.kotlin_project.data.Recipe
 import com.example.kotlin_project.data.RecipesRepository
+import kotlinx.serialization.json.Json
 
 
 enum class RecipesScreenEnum() {
@@ -51,7 +57,8 @@ enum class RecipesScreenEnum() {
 @Composable
 fun RecipesScreen(
     recipesRepository: RecipesRepository,
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    sharedViewModel: SharedViewModel = hiltViewModel()
 ) {
     NavHost(
         navController = navController,
@@ -63,6 +70,16 @@ fun RecipesScreen(
                 navController = navController
 
             )
+        }
+        composable(route = Screen.SocialNetwork.route) {
+            SocialNetworkScreen(navController = navController)
+        }
+        composable(
+            route = "${Screen.MainFragment2.route}/{recipeJson}",
+            arguments = listOf(navArgument("recipeJson") { type = NavType.StringType })
+        ) { navBackStackEntry ->
+            val recipeJson = navBackStackEntry.arguments?.getString("recipeJson")
+            MainFragment2(navController = navController, recipeJson = recipeJson, onCancel = { navController.popBackStack() })
         }
         composable(
             route = "${RecipesScreenEnum.RecipesDetails.name}/{recipeId}",
@@ -102,6 +119,21 @@ fun MainRecipesScreen(
                 modifier = Modifier.padding(8.dp)
             )
             SearchComponent(viewModel = viewModel)
+
+            Column(modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center) {
+                Spacer(modifier = Modifier.padding(8.dp))
+                Button(onClick = {
+                    navController.navigate(Screen.SocialNetwork.route)
+                },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Pink, contentColor = White)
+                ) {
+                    Text(text = "Check Public Recipes from our Community!")
+                }
+            }
+
+
             filteredRecipes.forEach { recipe ->
                 RecipeListItem(
                     recipe = recipe,
@@ -213,4 +245,7 @@ fun RecipeListItem(
     }
 }
 
-
+fun navigateToMainFragment2(navController: NavHostController, recipe: Recipe) {
+    val recipeJson = Uri.encode(Json.encodeToString(Recipe.serializer(), recipe))
+    navController.navigate("${Screen.MainFragment2.route}/$recipeJson")
+}

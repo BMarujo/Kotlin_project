@@ -1,6 +1,10 @@
 package com.example.kotlin_project.timer
 
+import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutLinearInEasing
@@ -33,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +45,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
 import com.example.kotlin_project.R
 import com.example.kotlin_project.data.model.TimerState
 import com.example.kotlin_project.ui.theme.ClockTheme
@@ -144,6 +150,7 @@ fun TimerScreen(
                 timerState = timerState,
                 timerActions = timerActions,
                 isDoneTransition = isDoneTransition,
+                context = LocalContext.current,
             )
         }
     }
@@ -267,6 +274,7 @@ private fun Buttons(
     timerState: TimerState,
     timerActions: TimerActions,
     isDoneTransition: Transition<Boolean>,
+    context: Context,
 ) {
     Box(modifier = modifier) {
         isDoneTransition.AnimatedVisibility(
@@ -286,9 +294,14 @@ private fun Buttons(
         ) {
             ClockButton(
                 text = stringResource(id = R.string.start),
-                onClick = { timerActions.start() },
+                onClick = {
+                    if (NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+                        timerActions.start()
+                    } else {
+                        checkNotificationPermission(context, timerActions)
+                    }
+                },
                 enabled = timerState.timeInMillis != 0L,
-
             )
         }
 
@@ -329,5 +342,23 @@ private fun Buttons(
                 )
             }
         }
+    }
+}
+
+fun checkNotificationPermission(context: Context, timerActions: TimerActions) {
+    val areNotificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+
+    if (!areNotificationsEnabled) {
+        AlertDialog.Builder(context)
+            .setTitle("Enable Notifications")
+            .setMessage("Please enable notifications for our app in your system settings.")
+            .setPositiveButton("Go to settings") { _, _ ->
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+                context.startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }
