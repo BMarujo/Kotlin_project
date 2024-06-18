@@ -249,7 +249,7 @@ fun Content2(
             Description(recipe)
             IngredientsHeader()
             IngredientsList2(ingredients)
-            Read_Button(recipe.description, navController)
+            Read_Button2(recipe.description, viewModel = viewModel())
         }
     }
 }
@@ -262,9 +262,9 @@ fun IngredientsList2(ingredients: List<IngredientData>) {
 }
 
 @Composable
-fun Read_Button(description: String, navController: NavHostController) {
+fun Read_Button2(description: String, viewModel: SocialNetworkViewModel) {
     Button(
-        onClick = { /* Implement reading description out loud */ },
+        onClick = { viewModel.readDescription(description) },
         elevation = null,
         shape = Shapes.small,
         colors = ButtonDefaults.buttonColors(
