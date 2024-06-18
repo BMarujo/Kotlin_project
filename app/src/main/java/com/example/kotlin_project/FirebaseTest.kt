@@ -1,4 +1,4 @@
-package com.example.kotlin_project
+/*package com.example.kotlin_project
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -78,3 +78,4 @@ fun FirebaseTestPreview() {
         FirebaseTest()
     }
 }
+*/

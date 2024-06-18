@@ -71,6 +71,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -142,7 +143,7 @@ fun HomePage(recipesRepository: RecipesRepository) {
             NavigationBar {
                 items.forEachIndexed { index, item ->
                     NavigationBarItem(icon = { Icon(icons[index], contentDescription = item) },
-                        label = { Text(item) },
+                        label = { Text(item, fontSize = 11.sp) },
                         selected = selectedItem == index,
                         onClick = { selectedItem = index },
                         colors = NavigationBarItemDefaults.colors(
@@ -491,7 +492,6 @@ fun HomeScreen(selectedItem: Int, onItemSelected: (Int) -> Unit) {
                         })
                     }
 
-                    // to test the scroll
 
                     Card(
 // blur background
@@ -550,7 +550,7 @@ fun HomeScreen(selectedItem: Int, onItemSelected: (Int) -> Unit) {
                             )
                         })
                     }
-                    Card(
+                    /*Card(
 // blur background
                         modifier = Modifier
                             .padding(16.dp)
@@ -606,7 +606,7 @@ fun HomeScreen(selectedItem: Int, onItemSelected: (Int) -> Unit) {
                                 )*/
                             )
                         })
-                    }
+                    }*/
                 }
             }
         }

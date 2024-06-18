@@ -35,10 +35,10 @@ class StorageUtil{
                 try {
                     spaceRef.putBytes(byteArray).await() // Await the upload task
                     val downloadUrl = spaceRef.downloadUrl.await() // Await the download URL
-                    Toast.makeText(context, "Upload succeeded", Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(context, "Upload succeeded", Toast.LENGTH_SHORT).show()
                     downloadUrl.toString() // Return the download URL as a String
                 } catch (e: Exception) {
-                    Toast.makeText(context, "Upload failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Upload to DB failed: ${e.message}", Toast.LENGTH_SHORT).show()
                     null // Return null if there was an error
                 }
             } else {
