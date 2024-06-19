@@ -50,8 +50,7 @@ import kotlinx.serialization.json.Json
 
 
 enum class RecipesScreenEnum() {
-    Recipes,
-    RecipesDetails,
+    Recipes, RecipesDetails,
 }
 
 @Composable
@@ -79,7 +78,9 @@ fun RecipesScreen(
             arguments = listOf(navArgument("recipeJson") { type = NavType.StringType })
         ) { navBackStackEntry ->
             val recipeJson = navBackStackEntry.arguments?.getString("recipeJson")
-            MainFragment2(navController = navController, recipeJson = recipeJson, onCancel = { navController.popBackStack() })
+            MainFragment2(navController = navController,
+                recipeJson = recipeJson,
+                onCancel = { navController.popBackStack() })
         }
         composable(
             route = "${RecipesScreenEnum.RecipesDetails.name}/{recipeId}",
@@ -88,15 +89,17 @@ fun RecipesScreen(
             val recipeId = navBackStackEntry.arguments?.getInt("recipeId")
             val viewModel = RecipeViewModel(recipesRepository, context = LocalContext.current)
 
-                recipeId?.let { id ->
-                    MainFragment(
-                        recipeId = id,
-                        viewModel = viewModel,
-                        onCancel = {
-                            navController.popBackStack(RecipesScreenEnum.Recipes.name, inclusive = false)
-                        },
-                    )
-                }
+            recipeId?.let { id ->
+                MainFragment(
+                    recipeId = id,
+                    viewModel = viewModel,
+                    onCancel = {
+                        navController.popBackStack(
+                            RecipesScreenEnum.Recipes.name, inclusive = false
+                        )
+                    },
+                )
+            }
         }
 
     }
@@ -104,8 +107,7 @@ fun RecipesScreen(
 
 @Composable
 fun MainRecipesScreen(
-    viewModel: RecipeViewModel,
-    navController: NavHostController
+    viewModel: RecipeViewModel, navController: NavHostController
 ) {
     //val allRecipes by viewModel.allRecipes.collectAsState(initial = emptyList())
     val filteredRecipes by viewModel.filteredRecipes.collectAsState()
@@ -120,14 +122,18 @@ fun MainRecipesScreen(
             )
             SearchComponent(viewModel = viewModel)
 
-            Column(modifier = Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 Spacer(modifier = Modifier.padding(8.dp))
-                Button(onClick = {
-                    navController.navigate(Screen.SocialNetwork.route)
-                },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Pink, contentColor = White)
+                Button(
+                    onClick = {
+                        navController.navigate(Screen.SocialNetwork.route)
+                    }, colors = ButtonDefaults.buttonColors(
+                        containerColor = Pink, contentColor = White
+                    )
                 ) {
                     Text(text = "Check Public Recipes from our Community!")
                 }
@@ -136,13 +142,13 @@ fun MainRecipesScreen(
 
             filteredRecipes.forEach { recipe ->
                 RecipeListItem(
-                    recipe = recipe,
-                    navController = navController
+                    recipe = recipe, navController = navController
                 )
             }
         }
     }
 }
+
 @Composable
 fun SearchComponent(viewModel: RecipeViewModel) {
     Column(
@@ -152,29 +158,23 @@ fun SearchComponent(viewModel: RecipeViewModel) {
     ) {
         var text by remember { mutableStateOf("") }
 
-        OutlinedTextField(
-            value = text,
-            onValueChange = {
-                text = it
-                viewModel.setSearchQuery(it)
-            },
-            label = { Text("Search") },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = Color.Black
-                )
-            },
-            modifier = Modifier.fillMaxWidth()
+        OutlinedTextField(value = text, onValueChange = {
+            text = it
+            viewModel.setSearchQuery(it)
+        }, label = { Text("Search") }, leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search",
+                tint = Color.Black
+            )
+        }, modifier = Modifier.fillMaxWidth()
         )
     }
 }
 
 @Composable
 fun RecipeListItem(
-    recipe: Recipe,
-    navController: NavHostController
+    recipe: Recipe, navController: NavHostController
 ) {
     Card(
         modifier = Modifier
@@ -199,24 +199,18 @@ fun RecipeListItem(
             )
             Spacer(modifier = Modifier.padding(4.dp))
             Text(
-                text = recipe.name,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
+                text = recipe.name, fontSize = 24.sp, fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
-                text = "Ingredients",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold
+                text = "Ingredients", fontSize = 20.sp, fontWeight = FontWeight.SemiBold
             )
             Text(text = recipe.ingredients)
 
             Spacer(modifier = Modifier.padding(8.dp))
             Column {
                 Text(
-                    text = "Instructions",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold
+                    text = "Instructions", fontSize = 20.sp, fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = recipe.description
@@ -228,13 +222,14 @@ fun RecipeListItem(
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Button(onClick = {
-                    navController.navigate("${RecipesScreenEnum.RecipesDetails.name}/${recipe.id}") {
-                        popUpTo(RecipesScreenEnum.Recipes.name) { inclusive = false }
+                Button(
+                    onClick = {
+                        navController.navigate("${RecipesScreenEnum.RecipesDetails.name}/${recipe.id}") {
+                            popUpTo(RecipesScreenEnum.Recipes.name) { inclusive = false }
                         }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Pink, contentColor = White)
+                    }, colors = ButtonDefaults.buttonColors(
+                        containerColor = Pink, contentColor = White
+                    )
                 ) {
                     Text(text = "Open Recipe's Details")
 
